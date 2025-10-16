@@ -1,0 +1,70 @@
+<ng-scrollbar style="height: calc(100vh - 88px)" visibility="hover" orientation="vertical" [dir]="direction">
+  @if (showContent) {
+    <app-card [showHeader]="false" cardClass="user-card" padding="20">
+      <div class="flex align-item-center">
+        <div class="flex-shrink-0">
+          <div class="avatar-circle-large" [style.background]="createStableAvatar().color">
+            {{ createStableAvatar().letter }}
+          </div>
+        </div>
+        <div class="flex-grow-1 user-details">
+          <div class="f-w-600">{{ this.authenticationService.currentUserName }}</div>
+          <div class="mat-caption">Hello, {{ userName }}</div>
+        </div>
+        <div class="user-setting">
+          <a href="javascript:" [matMenuTriggerFor]="menu" class="text-muted">
+            <svg class="pc-icon">
+              <use xlink:href="assets/fonts/custom-icon.svg#custom-sort-outline"></use>
+            </svg>
+          </a>
+          <mat-menu #menu="matMenu" [overlapTrigger]="false" yPosition="below" xPosition="after">
+            <button mat-menu-item>
+              <a [routerLink]="['/', 'profile', 'account', 'profile']" class="text-muted">
+                <i class="ti ti-user f-18 m-r-10"></i>
+                <span>Mon compte</span>
+              </a>
+            </button>
+            <button mat-menu-item>
+              <a href="javascript:" class="text-muted" (click)="logout()">
+                <i class="ti ti-power f-18 m-r-10"></i>
+                <span>Déconnexion</span>
+              </a>
+            </button>
+          </mat-menu>
+        </div>
+      </div>
+    </app-card>
+  }
+  <div class="navbar-content">
+    <ul class="nav coded-inner-navbar" (click)="fireOutClick()">
+      @for (item of menus(); track item) {
+        @if (item.type === 'group') {
+          <app-menu-group-vertical [item]="item" />
+        } @else if (item.type === 'item') {
+          <app-menu-item [item]="item" />
+        } @else if (item.type === 'collapse') {
+          <app-menu-collapse [item]="item" />
+        }
+      }
+    </ul>
+  </div>
+
+  <!-- Section de vérification en bas de sidebar -->
+  <div class="verification-banner">
+    <app-card [showHeader]="false" cardClass="verification-card" padding="16" style="background-color: #c2410c !important;" >
+      <div class="verification-content">
+        <div class="verification-text">
+          <h4 class="verification-title">Compte non vérifié</h4>
+          <p class="verification-description">
+            Finalisez votre inscription en vérifiant votre identité. Cette étape est obligatoire pour accéder à toutes les fonctionnalités.
+          </p>
+        </div>
+        <div class="verification-action">
+          <button class="btn-verify-account" mat-flat-button color="primary" (click)="startVerification()">
+            Vérifier mon compte
+          </button>
+        </div>
+      </div>
+    </app-card>
+  </div>
+</ng-scrollbar>

@@ -1,0 +1,17 @@
+<div class="chart">
+  <div *ngIf="isLoading" class="loading-indicator">
+    Chargement des données utilisateurs...
+  </div>
+
+  <apx-chart
+    *ngIf="!isLoading"
+    [series]="chartOptions.series"
+    [chart]="chartOptions.chart"
+    [dataLabels]="chartOptions.dataLabels"
+    [plotOptions]="chartOptions.plotOptions"
+    [fill]="chartOptions.fill"
+    [colors]="chartOptions.colors"
+    [labels]="chartOptions.labels"
+    [legend]="chartOptions.legend"
+  ></apx-chart>
+</div>

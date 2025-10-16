@@ -1,0 +1,66 @@
+<mat-drawer-container class="drawer-container" [dir]="direction">
+  <mat-drawer
+    #sidebar
+    class="pc-sidebar"
+    [mode]="modeValue"
+    opened
+    [ngClass]="{
+      compact: currentLayout === 'compact',
+      horizontal: currentLayout === 'horizontal'
+    }"
+  >
+    <nav>
+      <div class="navbar-wrapper">
+        <div class="m-header">
+          <a href="/" class="flex align-item-center">
+            <img src="assets/images/icon.png" alt="user-image" class="" width="50" />
+            <a href="https://phoenixcoded.gitbook.io/able-pro/versioning" target="_blank" class="version">
+              v{{ currentApplicationVersion }}
+            </a>
+          </a>
+        </div>
+        @if (currentLayout === 'vertical') {
+          <app-vertical-menu [menus]="menus" />
+        }
+        @if (currentLayout === 'compact') {
+          <app-compact-menu [menus]="menus" />
+        }
+      </div>
+    </nav>
+  </mat-drawer>
+  <div>
+    <app-nav-bar
+      [ngClass]="{
+        'horizontal-navbar': currentLayout === 'horizontal'
+      }"
+    />
+    @if (currentLayout === 'horizontal') {
+      <app-horizontal-menu
+        [menus]="menus"
+        [ngClass]="{
+          'horizontal-menu': currentLayout === 'horizontal'
+        }"
+      />
+    }
+    <div class="app-container">
+      <app-breadcrumb [dashboard]="true" />
+      <div class="main-body">
+        <div class="page-wrapper">
+          <router-outlet />
+        </div>
+      </div>
+    </div>
+    <app-footer></app-footer>
+  </div>
+</mat-drawer-container>
+<app-configuration />
+<!-- <div class="floating-button">
+  <a mat-flat-button class="b-rad-20" color="warn" [href]="buyNowLinkService.buyNowLink" target="_blank">
+    <div class="flex align-item-center gap-1">
+      <svg class="pc-icon">
+        <use xlink:href="assets/fonts/custom-icon.svg#custom-shopping-cart"></use>
+      </svg>
+      <span>Buy Now</span>
+    </div>
+  </a>
+</div> -->

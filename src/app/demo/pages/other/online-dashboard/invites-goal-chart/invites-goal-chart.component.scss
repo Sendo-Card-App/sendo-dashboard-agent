@@ -1,0 +1,29 @@
+.summary-details {
+  display: inline-block;
+  text-align: center;
+  padding-left: 16px;
+  padding-right: 16px;
+
+  @media (max-width: 575px) {
+    padding: 0px;
+  }
+
+  h5 {
+    display: inline-flex;
+    align-items: center;
+    gap: 1;
+    margin-bottom: 0;
+  }
+}
+.user-status {
+  padding: 4px 12px;
+  border-radius: 16px;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.summary-details {
+  padding: 8px;
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.02);
+}

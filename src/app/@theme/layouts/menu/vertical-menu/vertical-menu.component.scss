@@ -1,0 +1,191 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+:host {
+  display: block;
+  font-family: 'Montserrat', sans-serif;
+  background-color: var(--bg-default);
+  color: var(--text-secondary);
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.account-info {
+  .user-status {
+    position: absolute;
+    padding: 16px;
+    right: 0;
+    top: 0;
+
+    span {
+      font-size: 0.75em;
+      padding: 0.25em 0.9em;
+      display: inline-block;
+      border-radius: 8px;
+    }
+  }
+
+  .border-side {
+    border-right: 1px solid var(--accent-300);
+    border-left: 1px solid var(--accent-300);
+  }
+}
+
+/* Avatar */
+.avatar-circle-large {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 20px;
+  margin: 0 auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Badge de statut */
+.user-status {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+
+  span {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 8px;
+  }
+}
+
+/* Rôles */
+.roles-container {
+  mat-chip {
+    margin: 3px;
+    color: white;
+    font-weight: 500;
+  }
+}
+
+/* Liste des détails */
+.list-group-item {
+  border-left: 0;
+  border-right: 0;
+
+  &:first-child {
+    border-top: 0;
+  }
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+/* Layout responsive */
+@media (max-width: 992px) {
+  .col-lg-4, .col-lg-8 {
+    margin-bottom: 20px;
+  }
+}
+
+/* SCSS pour la section de vérification */
+.verification-banner {
+  border-top: 1px solid #e0e0e0;
+  position:absolute;
+  bottom: 0px;
+  // background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+
+  .verification-card {
+    border: 1px solid #ffd54f;
+    border-radius: 8px;
+    background: #c2410c !important;
+  }
+
+  .verification-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .verification-icon {
+    text-align: center;
+
+    .verification-icon-sandbox {
+      width: 32px;
+      height: 32px;
+      color: #ff9800;
+    }
+  }
+
+  .verification-text {
+    text-align: center;
+
+    .verification-title {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #e65100;
+      margin: 0 0 8px 0;
+    }
+
+    .verification-description {
+      font-size: 0.875rem;
+      color: #5d4037;
+      line-height: 1.4;
+      margin: 0;
+    }
+  }
+
+  .verification-action {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+
+    ::ng-deep .mat-checkbox {
+      .mat-checkbox-label {
+        font-size: 0.875rem;
+        font-weight: 400;
+        color: #5d4037;
+      }
+
+      &.mat-checkbox-checked {
+        .mat-checkbox-label {
+          color: #2e7d32;
+        }
+      }
+    }
+
+    .btn-verify-account {
+      width: 100%;
+      font-size: 0.875rem;
+      font-weight: 400;
+      border-radius: 6px;
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+      }
+    }
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .verification-banner {
+    padding: 12px;
+
+    .verification-content {
+      gap: 10px;
+    }
+
+    .verification-text {
+      .verification-title {
+        font-size: 0.9rem;
+      }
+
+      .verification-description {
+        font-size: 0.8rem;
+      }
+    }
+  }
+}

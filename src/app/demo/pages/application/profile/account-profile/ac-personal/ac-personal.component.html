@@ -1,0 +1,107 @@
+<div class="row m-t-25">
+  <div class="col-sm-12">
+    <app-card cardTitle="Gestion des Rôles">
+      <!-- <mat-divider class="m-y-15"></mat-divider> -->
+        <div class="row">
+          <div class="col-md-8">
+            <label for="email">Nom du role</label>
+            <form [formGroup]="form" (ngSubmit)="onSubmit()">
+              <div class="row align-items-end">
+                <div class="col">
+                  <mat-form-field appearance="outline" class="w-100 m-t-5">
+                    <mat-label>Nom du rôle</mat-label>
+                    <input matInput placeholder="Name" formControlName="name" required />
+                    <mat-error *ngIf="form.get('name')?.hasError('required')">
+                      Le nom du rôle est requis
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+                <div class="col-auto p-10">
+                  <button mat-flat-button color="primary" [disabled]="form.invalid || submitting">
+                    {{ submitting ? 'Envoi...' : 'Envoyer' }}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      <div class="p-t-25">
+        <!-- Loading state -->
+        <div *ngIf="loading" class="text-center p-20">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p class="m-t-15">Chargement des rôles...</p>
+        </div>
+
+        <!-- Roles table -->
+        <div *ngIf="!loading" class="table-responsive">
+          <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+            <!-- ID Column -->
+            <ng-container matColumnDef="id">
+              <th mat-header-cell *matHeaderCellDef>ID</th>
+              <td mat-cell *matCellDef="let role">{{ role.id }}</td>
+            </ng-container>
+
+            <!-- Name Column -->
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>Nom du Rôle</th>
+              <td mat-cell *matCellDef="let role">
+                <span class="badge" [ngClass]="getRoleBadgeClass(role.name)">
+                  {{ role.name }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Created At Column -->
+            <ng-container matColumnDef="createdAt">
+              <th mat-header-cell *matHeaderCellDef>Créé le</th>
+              <td mat-cell *matCellDef="let role">
+                {{ role.createdAt | date:'dd/MM/yyyy HH:mm' }}
+              </td>
+            </ng-container>
+
+            <!-- Updated At Column -->
+            <ng-container matColumnDef="updatedAt">
+              <th mat-header-cell *matHeaderCellDef>Mis à jour le</th>
+              <td mat-cell *matCellDef="let role">
+                {{ role.updatedAt | date:'dd/MM/yyyy HH:mm' }}
+              </td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Actions</th>
+              <td mat-cell *matCellDef="let role" class="text-right">
+                <ul class="list-inline p-l-0">
+                  <!-- <li class="list-inline-item m-r-10" matTooltip="View" (click)="customerDetails()">
+                    <a href="javascript:" class="avatar avatar-xs text-muted">
+                      <i class="ti ti-eye f-18"></i>
+                    </a>
+                  </li> -->
+                  <li class="list-inline-item m-r-10" matTooltip="Edit" (click)="openEditDialog(role)">
+                    <a href="javascript:" class="avatar avatar-xs text-muted">
+                      <i class="ti ti-edit-circle f-18"></i>
+                    </a>
+                  </li>
+                  <li class="list-inline-item m-r-10" matTooltip="Delete">
+                    <a href="javascript:" class="avatar avatar-xs text-warn-500">
+                      <i class="ti ti-trash f-18"></i>
+                    </a>
+                  </li>
+                </ul>
+
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
+        </div>
+
+        <!-- Empty state -->
+        <div *ngIf="!loading && dataSource.length === 0" class="text-center p-20">
+          <p>Aucun rôle trouvé</p>
+        </div>
+      </div>
+    </app-card>
+  </div>
+</div>

@@ -1,0 +1,133 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+:host {
+  display: block;
+  font-family: 'Montserrat', sans-serif;
+  background-color: var(--bg-default);
+  color: var(--text-secondary);
+  padding: 1rem;
+  box-sizing: border-box;
+}
+::ng-deep.upcoming-course {
+  .list-group {
+    .list-group-item {
+      &:not(:last-child) {
+        border-bottom: 1px solid var(--accent-300);
+      }
+    }
+  }
+}
+.top-wallets {
+  .list-group-item {
+    padding: 1rem;
+    border-left: 0;
+    border-right: 0;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  .avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+  }
+}
+
+
+/* welcome.component.scss */
+.welcome-section {
+  background-color: #218366;
+  padding: 1rem;
+  text-align: left;
+  border-radius: 20px;
+  margin-bottom: 2rem;
+
+  .container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  .welcome-title {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: white;
+    line-height: 1.2;
+  }
+
+  .welcome-subtitle {
+    font-size: 0.9rem;
+    color: #ffffff;
+    max-width: 60%;
+  }
+
+  .actions-container {
+    display: flex;
+    justify-content: left;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    display: inline-block;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.8rem;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+
+    &.primary {
+      background-color: #ffffff;
+      color: #218366;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+      }
+    }
+
+    &.secondary {
+      background-color: transparent;
+      color: #ffffff;
+      border: 2px solid #3bf6b2;
+
+      &:hover {
+        background-color: #3b82f6;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+      }
+    }
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .welcome-section {
+    padding: 2.5rem 0.5rem;
+
+    .welcome-title {
+      font-size: 2rem;
+    }
+
+    .welcome-subtitle {
+      font-size: 1.125rem;
+      max-width: 90%;
+    }
+
+    .actions-container {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .action-btn {
+      width: 100%;
+      max-width: 250px;
+    }
+  }
+}

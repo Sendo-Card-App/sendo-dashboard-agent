@@ -1,0 +1,50 @@
+<div class="auth-main">
+  <div class="auth-wrapper version-1">
+    <div class="auth-form">
+      <div class="auth-background">
+        <div class="yellow-circle"></div>
+        <div class="red-circle"></div>
+      </div>
+      <div class="main-form">
+        <app-card [showHeader]="false" class="auth-form-card" padding="40">
+          <div class="forgot-logo m-b-25">
+            <a routerLink="/">
+              <img src="assets/images/icon-logo.png" alt="logo" width="100"/>
+            </a>
+          </div>
+
+          <div class="text-center verification-container">
+            <!-- Pendant le chargement -->
+            <div *ngIf="loading" class="verification-loading">
+              <mat-spinner diameter="50"></mat-spinner>
+              <p class="text-muted m-t-20">{{ message }}</p>
+            </div>
+
+            <!-- Après vérification -->
+            <div *ngIf="!loading" class="verification-result">
+              <mat-icon class="verification-icon" [class.success]="verificationStatus === 'success'"
+                                      [class.error]="verificationStatus === 'error'">
+                {{ verificationStatus === 'success' ? 'check_circle' : 'error' }}
+              </mat-icon>
+              <h3 [class.text-success]="verificationStatus === 'success'"
+                  [class.text-error]="verificationStatus === 'error'">
+                {{ message }}
+              </h3>
+
+              <div *ngIf="verificationStatus === 'success'" class="m-t-20">
+                <p class="text-muted">Redirection vers la page de connexion...</p>
+              </div>
+
+              <div *ngIf="verificationStatus === 'error'" class="m-t-20">
+                <button mat-flat-button color="primary" (click)="verifyAccount()">
+                  Réessayer
+                </button>
+                <p class="text-muted m-t-10">Ou contactez le support technique</p>
+              </div>
+            </div>
+          </div>
+        </app-card>
+      </div>
+    </div>
+  </div>
+</div>
