@@ -6,7 +6,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { KycService, KycDocumentType, KycUploadResponse } from 'src/app/@theme/services/kyc.service';
+import { KycService, KycDocumentType, } from 'src/app/@theme/services/kyc.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 interface KycStep {
@@ -18,6 +18,8 @@ interface KycStep {
   files: File[];
   isUploading: boolean;
   uploadSuccess: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  submittedDocuments?: any[]; // Pour stocker les documents déjà soumis
 }
 
 @Component({
@@ -48,17 +50,19 @@ export class KycVerificationComponent {
       completed: false,
       files: [],
       isUploading: false,
-      uploadSuccess: false
+      uploadSuccess: false,
+      submittedDocuments: []
     },
     {
-      id: 'ADRESS_PROOF',
+      id: 'ADDRESS_PROOF',
       title: 'Justificatif de domicile',
       description: 'Facture récente (électricité, eau, téléphone) de moins de 3 mois prouvant votre adresse.',
       icon: 'home',
       completed: false,
       files: [],
       isUploading: false,
-      uploadSuccess: false
+      uploadSuccess: false,
+      submittedDocuments: []
     },
     {
       id: 'RCCM',
@@ -68,7 +72,8 @@ export class KycVerificationComponent {
       completed: false,
       files: [],
       isUploading: false,
-      uploadSuccess: false
+      uploadSuccess: false,
+      submittedDocuments: []
     },
     {
       id: 'NIU_PROOF',
@@ -78,7 +83,8 @@ export class KycVerificationComponent {
       completed: false,
       files: [],
       isUploading: false,
-      uploadSuccess: false
+      uploadSuccess: false,
+      submittedDocuments: []
     },
     {
       id: 'SELFIE',
@@ -88,7 +94,8 @@ export class KycVerificationComponent {
       completed: false,
       files: [],
       isUploading: false,
-      uploadSuccess: false
+      uploadSuccess: false,
+      submittedDocuments: []
     },
     {
       id: 'ARTICLES_ASSOCIATION_PROOF',
@@ -98,7 +105,8 @@ export class KycVerificationComponent {
       completed: false,
       files: [],
       isUploading: false,
-      uploadSuccess: false
+      uploadSuccess: false,
+      submittedDocuments: []
     }
   ];
 
@@ -117,6 +125,14 @@ export class KycVerificationComponent {
     if (input.files && input.files.length > 0) {
       const files = Array.from(input.files);
       const step = this.kycSteps[stepIndex];
+
+      // Empêcher l'ajout de fichiers si l'étape est déjà complétée
+      if (step.completed) {
+        this.snackbar.open('Cette étape est déjà complétée. Vous ne pouvez pas ajouter de nouveaux fichiers.', 'Fermer', {
+          duration: 3000
+        });
+        return;
+      }
 
       // Validation des types de fichiers
       const validFiles = files.filter(file =>
@@ -150,8 +166,17 @@ export class KycVerificationComponent {
 
   removeFile(stepIndex: number, fileIndex: number): void {
     const step = this.kycSteps[stepIndex];
+
+    // Empêcher la suppression si l'étape est déjà complétée
+    if (step.completed) {
+      this.snackbar.open('Cette étape est déjà complétée. Vous ne pouvez pas modifier les fichiers.', 'Fermer', {
+        duration: 3000
+      });
+      return;
+    }
+
     step.files.splice(fileIndex, 1);
-    step.uploadSuccess = false; // Réinitialiser le statut d'upload si on supprime un fichier
+    step.uploadSuccess = false;
 
     this.snackbar.open('Fichier supprimé', 'Fermer', {
       duration: 2000
@@ -160,6 +185,14 @@ export class KycVerificationComponent {
 
   uploadStepDocuments(stepIndex: number): void {
     const step = this.kycSteps[stepIndex];
+
+    // Empêcher l'upload si l'étape est déjà complétée
+    if (step.completed) {
+      this.snackbar.open('Cette étape est déjà complétée.', 'Fermer', {
+        duration: 3000
+      });
+      return;
+    }
 
     if (step.files.length === 0) {
       this.snackbar.open('Veuillez sélectionner au moins un fichier pour cette étape.', 'Fermer', {
@@ -170,16 +203,24 @@ export class KycVerificationComponent {
 
     step.isUploading = true;
 
-    this.kycService.uploadKycDocuments(step.id, step.files).subscribe({
-      next: (response: KycUploadResponse) => {
-        step.isUploading = false;
+    console.log('Début upload pour:', step.id, 'Fichiers:', step.files);
 
-        if (response.success) {
+    this.kycService.uploadKycDocuments(step.id, step.files).subscribe({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      next: (response: any) => {
+        step.isUploading = false;
+        console.log('Réponse API complète:', response);
+
+        // Vérification basée sur la structure réelle de la réponse
+        const isSuccess = response.status === 201 || response.status === 200;
+
+        if (isSuccess) {
           step.uploadSuccess = true;
           step.completed = true;
+          step.submittedDocuments = response.data; // Stocker les documents soumis
           this.calculateProgress();
 
-          this.snackbar.open('Documents uploadés avec succès !', 'Fermer', {
+          this.snackbar.open(response.message || 'Documents uploadés avec succès !', 'Fermer', {
             duration: 3000
           });
 
@@ -187,18 +228,31 @@ export class KycVerificationComponent {
           if (this.currentStep < this.kycSteps.length - 1) {
             setTimeout(() => {
               this.currentStep++;
-            }, 1000);
+            }, 1500);
           }
         } else {
-          this.snackbar.open('Erreur lors de l\'upload: ' + response.message, 'Fermer', {
+          const errorMessage = response.message || 'Erreur inconnue lors de l\'upload';
+          console.error('Erreur détaillée:', response);
+          this.snackbar.open('Erreur lors de l\'upload: ' + errorMessage, 'Fermer', {
             duration: 5000
           });
         }
       },
       error: (error) => {
         step.isUploading = false;
-        console.error('Erreur upload:', error);
-        this.snackbar.open('Une erreur est survenue lors de l\'envoi des documents.', 'Fermer', {
+        console.error('Erreur HTTP complète:', error);
+
+        let errorMessage = 'Une erreur est survenue lors de l\'envoi des documents.';
+
+        if (error.status === 500) {
+          errorMessage = 'Erreur serveur (500). Veuillez réessayer plus tard.';
+        } else if (error.error?.message) {
+          errorMessage = error.error.message;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+
+        this.snackbar.open(errorMessage, 'Fermer', {
           duration: 5000
         });
       }
@@ -226,6 +280,17 @@ export class KycVerificationComponent {
   // Méthode pour gérer le drag & drop
   onDrop(event: DragEvent, stepIndex: number): void {
     event.preventDefault();
+
+    const step = this.kycSteps[stepIndex];
+
+    // Empêcher le drop si l'étape est déjà complétée
+    if (step.completed) {
+      this.snackbar.open('Cette étape est déjà complétée. Vous ne pouvez pas ajouter de nouveaux fichiers.', 'Fermer', {
+        duration: 3000
+      });
+      return;
+    }
+
     if (event.dataTransfer?.files) {
       const inputEvent = { target: { files: event.dataTransfer.files } } as unknown as Event;
       this.onFileSelected(inputEvent, stepIndex);
@@ -242,5 +307,20 @@ export class KycVerificationComponent {
 
   get currentStepData(): KycStep {
     return this.kycSteps[this.currentStep];
+  }
+
+  // Méthode pour réinitialiser une étape (optionnel, pour l'admin)
+  resetStep(stepIndex: number): void {
+    const step = this.kycSteps[stepIndex];
+    step.files = [];
+    step.completed = false;
+    step.uploadSuccess = false;
+    step.isUploading = false;
+    step.submittedDocuments = [];
+    this.calculateProgress();
+
+    this.snackbar.open('Étape réinitialisée', 'Fermer', {
+      duration: 2000
+    });
   }
 }

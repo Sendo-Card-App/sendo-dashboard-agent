@@ -39,6 +39,12 @@ export interface BaseResponse<T = unknown> {
     };
     virtualCard: T | null;
     transactions: T[];
+
+    merchant: {
+      id: number;
+      typeAccount: string;
+      userId: number;
+    };
   }
 
 

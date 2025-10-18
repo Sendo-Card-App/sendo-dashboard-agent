@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AdminComponent } from './demo/layout/admin';
 import { EmptyComponent } from './demo/layout/empty/empty.component';
-import { RoleGuard } from './@theme/helpers/role.guards';
+// import { RoleGuard } from './@theme/helpers/role.guards';
 import { AlreadyLoggedInGuard } from './@theme/helpers/already-logged-in.guard';
 
 const routes: Routes = [
@@ -44,22 +44,22 @@ const routes: Routes = [
   {
     path: '',
     component: AdminComponent,
-    canActivateChild: [RoleGuard],
+    // canActivateChild: [RoleGuard],
     children: [
       {
         path: 'dashboard',
         loadComponent: () => import('./demo/pages/other/online-dashboard/online-dashboard.component').then((c) => c.OnlineDashboardComponent),
-        data: { roles: ['SUPER_ADMIN','SYSTEM_ADMIN','TECHNICAL_DIRECTOR','COMPLIANCE_OFFICER','MANAGEMENT_CONTROLLER','CUSTOMER_ADVISER','CARD_MANAGER'] }
+        // data: { roles: ['MERCHANT'] }
       },
        {
         path: 'verification',
         loadComponent: () => import('./demo/pages/kyc/kyc-verification/kyc-verification.component').then((c) => c.KycVerificationComponent),
-        data: { roles: ['SUPER_ADMIN','SYSTEM_ADMIN','TECHNICAL_DIRECTOR','COMPLIANCE_OFFICER','MANAGEMENT_CONTROLLER','CUSTOMER_ADVISER','CARD_MANAGER'] }
+        // data: { roles: ['MERCHANT'] }
       },
       {
         path: '',
         loadChildren: () => import('./demo/pages/application/application.module').then((m) => m.ApplicationModule),
-        data: { roles: ['SUPER_ADMIN'] }
+        // data: { roles: ['MERCHANT'] }
       },
     ]
   },

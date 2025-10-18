@@ -581,3 +581,127 @@
     }
   }
 }
+
+
+// Ajouter ces styles à kyc-verification.component.scss
+
+.step-completed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #10b981;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+.completed-step-message {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+
+  .success-icon {
+    color: #16a34a;
+    font-size: 2rem;
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+  }
+
+  .message-content {
+    h4 {
+      color: #15803d;
+      margin: 0 0 0.5rem 0;
+      font-weight: 600;
+    }
+
+    p {
+      color: #166534;
+      margin: 0 0 1rem 0;
+    }
+
+    .submitted-documents {
+      strong {
+        color: #15803d;
+        display: block;
+        margin-bottom: 0.5rem;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        li {
+          margin-bottom: 0.25rem;
+        }
+      }
+
+      .document-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #3b82f6;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+
+        mat-icon {
+          font-size: 1rem;
+          width: 1rem;
+          height: 1rem;
+        }
+      }
+    }
+  }
+}
+
+.file-drop-zone.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+
+  .drop-zone-content {
+    pointer-events: none;
+  }
+}
+
+.submitted-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  color: #10b981;
+  background: #f0fdf4;
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+// Désactiver les interactions pour les étapes complétées
+.step-item.completed {
+  cursor: default;
+
+  &:hover {
+    transform: none;
+    border-color: transparent;
+  }
+}
