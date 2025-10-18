@@ -18,6 +18,7 @@ export class RoleGuard implements CanActivate, CanActivateChild {
     return this.checkRoleAccess(childRoute);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private checkRoleAccess(route: ActivatedRouteSnapshot): boolean {
     const user = this.auth.getStoredUser() as MeResponse; // Cast vers MeResponse
 
