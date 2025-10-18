@@ -48,10 +48,16 @@
                     Documents envoyés
                   </span>
                 }
-                @if (step.files.length > 0 && !step.uploadSuccess) {
+                @if (step.files.length > 0 && !step.uploadSuccess && !step.isUploading) {
                   <span class="files-ready-indicator">
                     <mat-icon>file_present</mat-icon>
                     {{ step.files.length }} fichier(s) prêt(s)
+                  </span>
+                }
+                @if (step.completed && step.submittedDocuments && step.submittedDocuments.length > 0) {
+                  <span class="submitted-indicator">
+                    <mat-icon>verified</mat-icon>
+                    {{ step.submittedDocuments.length }} document(s) soumis
                   </span>
                 }
               </div>
@@ -98,69 +104,102 @@
             <div>
               <mat-card-title>{{ currentStepData.title }}</mat-card-title>
               <mat-card-subtitle>{{ currentStepData.description }}</mat-card-subtitle>
+              @if (currentStepData.completed) {
+                <div class="step-completed-badge">
+                  <mat-icon>verified</mat-icon>
+                  <span>Cette étape est complétée</span>
+                </div>
+              }
             </div>
           </div>
         </mat-card-header>
 
         <mat-card-content>
-          <!-- Instructions -->
-          <div class="upload-instructions">
-            <mat-icon>info</mat-icon>
-            <p>Vous pouvez sélectionner plusieurs fichiers pour cette étape. Tous les fichiers seront envoyés ensemble.</p>
-          </div>
-
-          <!-- Zone de dépôt de fichiers -->
-          <div
-            class="file-drop-zone"
-            (drop)="onDrop($event, currentStep)"
-            (dragover)="onDragOver($event)"
-            (dragenter)="onDragOver($event)">
-            <input
-              #fileInput
-              type="file"
-              multiple
-              accept="image/*,.pdf"
-              (change)="onFileSelected($event, currentStep)"
-              class="file-input">
-
-            <div class="drop-zone-content">
-              <mat-icon class="upload-icon">cloud_upload</mat-icon>
-              <h3>Glissez-déposez vos fichiers ici</h3>
-              <p>ou</p>
-              <button mat-stroked-button type="button" (click)="fileInput.click()">
-                <mat-icon>attach_file</mat-icon>
-                Parcourir les fichiers
-              </button>
-              <p class="file-types">Formats acceptés : JPG, PNG, PDF (Max. 10MB par fichier)</p>
-            </div>
-          </div>
-
-          <!-- Liste des fichiers sélectionnés -->
-          @if (currentStepData.files.length > 0) {
-            <div class="uploaded-files">
-              <h4>Fichiers à envoyer :</h4>
-              <div class="files-list">
-                @for (file of currentStepData.files; track file.name; let i = $index) {
-                  <div class="file-item">
-                    <div class="file-info">
-                      <mat-icon class="file-icon">{{ getFileIcon(file) }}</mat-icon>
-                      <div class="file-details">
-                        <span class="file-name">{{ file.name }}</span>
-                        <span class="file-size">{{ formatFileSize(file.size) }}</span>
-                      </div>
-                    </div>
-                    <button
-                      mat-icon-button
-                      color="warn"
-                      (click)="removeFile(currentStep, i)"
-                      class="remove-button"
-                      [disabled]="currentStepData.isUploading">
-                      <mat-icon>delete</mat-icon>
-                    </button>
+          <!-- Message d'étape complétée -->
+          @if (currentStepData.completed) {
+            <div class="completed-step-message">
+              <mat-icon class="success-icon">check_circle</mat-icon>
+              <div class="message-content">
+                <h4>Étape terminée</h4>
+                <p>Vous avez déjà soumis vos documents pour cette étape. Ils sont en cours de vérification.</p>
+                @if (currentStepData.submittedDocuments && currentStepData.submittedDocuments.length > 0) {
+                  <div class="submitted-documents">
+                    <strong>Documents soumis :</strong>
+                    <ul>
+                      @for (doc of currentStepData.submittedDocuments; track doc.id) {
+                        <li>
+                          <a [href]="doc.url" target="_blank" class="document-link">
+                            <mat-icon>link</mat-icon>
+                            Document {{ $index + 1 }} ({{ doc.status }})
+                          </a>
+                        </li>
+                      }
+                    </ul>
                   </div>
                 }
               </div>
             </div>
+          } @else {
+            <!-- Instructions -->
+            <div class="upload-instructions">
+              <mat-icon>info</mat-icon>
+              <p>Vous pouvez sélectionner plusieurs fichiers pour cette étape. Tous les fichiers seront envoyés ensemble.</p>
+            </div>
+
+            <!-- Zone de dépôt de fichiers -->
+            <div
+              class="file-drop-zone"
+              (drop)="onDrop($event, currentStep)"
+              (dragover)="onDragOver($event)"
+              (dragenter)="onDragOver($event)">
+              <input
+                #fileInput
+                type="file"
+                multiple
+                accept="image/*,.pdf"
+                (change)="onFileSelected($event, currentStep)"
+                class="file-input"
+                [disabled]="currentStepData.completed">
+
+              <div class="drop-zone-content" [class.disabled]="currentStepData.completed">
+                <mat-icon class="upload-icon">cloud_upload</mat-icon>
+                <h3>Glissez-déposez vos fichiers ici</h3>
+                <p>ou</p>
+                <button mat-stroked-button type="button" (click)="fileInput.click()" [disabled]="currentStepData.completed">
+                  <mat-icon>attach_file</mat-icon>
+                  Parcourir les fichiers
+                </button>
+                <p class="file-types">Formats acceptés : JPG, PNG, PDF (Max. 10MB par fichier)</p>
+              </div>
+            </div>
+
+            <!-- Liste des fichiers sélectionnés -->
+            @if (currentStepData.files.length > 0) {
+              <div class="uploaded-files">
+                <h4>Fichiers à envoyer ({{ currentStepData.files.length }}) :</h4>
+                <div class="files-list">
+                  @for (file of currentStepData.files; track file.name; let i = $index) {
+                    <div class="file-item">
+                      <div class="file-info">
+                        <mat-icon class="file-icon">{{ getFileIcon(file) }}</mat-icon>
+                        <div class="file-details">
+                          <span class="file-name">{{ file.name }}</span>
+                          <span class="file-size">{{ formatFileSize(file.size) }}</span>
+                        </div>
+                      </div>
+                      <button
+                        mat-icon-button
+                        color="warn"
+                        (click)="removeFile(currentStep, i)"
+                        class="remove-button"
+                        [disabled]="currentStepData.isUploading || currentStepData.completed">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
           }
         </mat-card-content>
 
@@ -180,7 +219,7 @@
 
           <!-- Bouton d'upload -->
           <div class="upload-action">
-            @if (currentStepData.files.length > 0 && !currentStepData.uploadSuccess) {
+            @if (!currentStepData.completed && currentStepData.files.length > 0 && !currentStepData.uploadSuccess) {
               <button
                 mat-flat-button
                 color="primary"
@@ -207,7 +246,7 @@
 
           <!-- Navigation suivante -->
           <div class="next-button">
-            @if (currentStep < kycSteps.length - 1 && currentStepData.uploadSuccess) {
+            @if (currentStep < kycSteps.length - 1 && (currentStepData.uploadSuccess || currentStepData.completed)) {
               <button
                 mat-stroked-button
                 (click)="navigateToStep(currentStep + 1)"

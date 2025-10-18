@@ -7,7 +7,7 @@ import { environment } from 'src/environments/environment';
 // ✅ Types stricts de documents KYC
 export type KycDocumentType =
   | 'ID_PROOF'
-  | 'ADRESS_PROOF'
+  | 'ADDRESS_PROOF'
   | 'RCCM'
   | 'NIU_PROOF'
   | 'SELFIE'

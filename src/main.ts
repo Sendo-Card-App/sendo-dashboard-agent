@@ -13,8 +13,8 @@ import { SharedModule } from './app/demo/shared/shared.module';
 import { GuestModule } from './app/demo/layout/front';
 import { AppComponent } from './app/app.component';
 // import { provideSocket } from './app/demo/shared/socket-io.config';
-import { SocketIoModule } from 'ngx-socket-io';
-import { socketConfig } from './app/demo/shared/socket-io.config';
+// import { SocketIoModule } from 'ngx-socket-io';
+// import { socketConfig } from './app/demo/shared/socket-io.config';
 
 
 if (environment.production) {
@@ -23,7 +23,7 @@ if (environment.production) {
 
 bootstrapApplication(AppComponent, {
   providers: [
-    importProvidersFrom(AppRoutingModule, SharedModule, BrowserModule, GuestModule,SocketIoModule.forRoot(socketConfig)),
+    importProvidersFrom(AppRoutingModule, SharedModule, BrowserModule, GuestModule,),
     { provide: HTTP_INTERCEPTORS, useClass: BasicAuthInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
     [provideHttpClient(withInterceptorsFromDi())],

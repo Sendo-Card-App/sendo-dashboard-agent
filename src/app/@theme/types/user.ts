@@ -6,6 +6,7 @@ export enum Role1 {
   MANAGEMENT_CONTROLLER = 'MANAGEMENT_CONTROLLER',
   CUSTOMER_ADVISER = 'CUSTOMER_ADVISER',
   CARD_MANAGER = 'CARD_MANAGER',
+  MERCHANT = 'MERCHANT',
 
 }
 export class User {
@@ -19,6 +20,7 @@ export class User {
     name: string;
     role: Role1[];
     country: string | null;
+    
   };
 }
 

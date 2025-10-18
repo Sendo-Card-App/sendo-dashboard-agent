@@ -18,6 +18,7 @@ export class RoleGuard implements CanActivate, CanActivateChild {
     return this.checkRoleAccess(childRoute);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private checkRoleAccess(route: ActivatedRouteSnapshot): boolean {
     const user = this.auth.getStoredUser() as MeResponse; // Cast vers MeResponse
 
@@ -29,30 +30,30 @@ export class RoleGuard implements CanActivate, CanActivateChild {
     }
 
     // 2. Vérification des rôles
-    if (!user.roles || user.roles.length === 0) {
+    if (!user.merchant) {
       this.router.navigate(['/unauthorized']);
       return false;
     }
 
     // 3. Récupération des rôles autorisés
-    const allowedRoles: string[] = route.data['roles'] || [];
+    // const allowedRoles: string[] = route.data['roles'] || [];
 
     // 4. Si aucun rôle requis, accès autorisé
-    if (allowedRoles.length === 0) {
-      return true;
-    }
+    // if (allowedRoles.length === 0) {
+    //   return true;
+    // }
 
     // 5. Vérification des rôles utilisateur
-    const hasRequiredRole = user.roles.some(role =>
-      allowedRoles.includes(role.name)
-    );
+    // const hasRequiredRole = user.roles.some(role =>
+    //   allowedRoles.includes(role.name)
+    // );
 
-    if (hasRequiredRole) {
-      return true;
-    }
+    // if (hasRequiredRole) {
+    //   return true;
+    // }
 
     // 6. Accès refusé
-    this.router.navigate(['/unauthorized']);
-    return false;
+    // this.router.navigate(['/unauthorized']);
+    return true;
   }
 }

@@ -1,5 +1,5 @@
 import { Navigation } from 'src/app/@theme/types/navigation';
-import { Role1 } from 'src/app/@theme/types/user';
+// import { Role1 } from 'src/app/@theme/types/user';
 
 export const menus: Navigation[] = [
   {
@@ -7,9 +7,7 @@ export const menus: Navigation[] = [
     title: '',
     type: 'group',
     icon: 'icon-navigation',
-    role: [Role1.SUPER_ADMIN, Role1.SYSTEM_ADMIN, Role1.CARD_MANAGER, Role1.COMPLIANCE_OFFICER, Role1.CUSTOMER_ADVISER,
-    Role1.MANAGEMENT_CONTROLLER, Role1.TECHNICAL_DIRECTOR
-    ],
+    // role: [Role1.MERCHANT],
     children: [
       {
         id: 'sample-page',
