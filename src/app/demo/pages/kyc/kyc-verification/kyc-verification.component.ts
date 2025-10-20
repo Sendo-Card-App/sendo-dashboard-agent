@@ -1,13 +1,30 @@
 // kyc-verification.component.ts
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { KycService, KycDocumentType, } from 'src/app/@theme/services/kyc.service';
+import { KycService, KycDocumentType } from 'src/app/@theme/services/kyc.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { AuthenticationService } from 'src/app/@theme/services/authentication.service';
+
+interface KycDocument {
+  id: number;
+  type: KycDocumentType;
+  typeAccount: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  url: string;
+  publicId: string;
+  idDocumentNumber: string | null;
+  taxIdNumber: string | null;
+  rejectionReason: string | null;
+  reviewedById: number | null;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
 interface KycStep {
   id: KycDocumentType;
@@ -18,8 +35,10 @@ interface KycStep {
   files: File[];
   isUploading: boolean;
   uploadSuccess: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  submittedDocuments?: any[]; // Pour stocker les documents déjà soumis
+  submittedDocuments?: KycDocument[];
+  canSubmit: boolean;
+  status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+  rejectionReason?: string | null;
 }
 
 @Component({
@@ -36,10 +55,12 @@ interface KycStep {
   templateUrl: './kyc-verification.component.html',
   styleUrls: ['./kyc-verification.component.scss']
 })
-export class KycVerificationComponent {
+export class KycVerificationComponent implements OnInit {
   currentStep = 0;
   progress = 0;
   allDocumentsSubmitted = false;
+  hasRejectedDocuments = false;
+  userKycDocuments: KycDocument[] = [];
 
   kycSteps: KycStep[] = [
     {
@@ -51,7 +72,8 @@ export class KycVerificationComponent {
       files: [],
       isUploading: false,
       uploadSuccess: false,
-      submittedDocuments: []
+      submittedDocuments: [],
+      canSubmit: true
     },
     {
       id: 'ADDRESS_PROOF',
@@ -62,7 +84,8 @@ export class KycVerificationComponent {
       files: [],
       isUploading: false,
       uploadSuccess: false,
-      submittedDocuments: []
+      submittedDocuments: [],
+      canSubmit: true
     },
     {
       id: 'RCCM',
@@ -73,7 +96,8 @@ export class KycVerificationComponent {
       files: [],
       isUploading: false,
       uploadSuccess: false,
-      submittedDocuments: []
+      submittedDocuments: [],
+      canSubmit: true
     },
     {
       id: 'NIU_PROOF',
@@ -84,7 +108,8 @@ export class KycVerificationComponent {
       files: [],
       isUploading: false,
       uploadSuccess: false,
-      submittedDocuments: []
+      submittedDocuments: [],
+      canSubmit: true
     },
     {
       id: 'SELFIE',
@@ -95,7 +120,8 @@ export class KycVerificationComponent {
       files: [],
       isUploading: false,
       uploadSuccess: false,
-      submittedDocuments: []
+      submittedDocuments: [],
+      canSubmit: true
     },
     {
       id: 'ARTICLES_ASSOCIATION_PROOF',
@@ -106,16 +132,76 @@ export class KycVerificationComponent {
       files: [],
       isUploading: false,
       uploadSuccess: false,
-      submittedDocuments: []
+      submittedDocuments: [],
+      canSubmit: true
     }
   ];
 
-  constructor(private kycService: KycService, private snackbar: MatSnackBar) {
+  constructor(
+    private kycService: KycService,
+    private snackbar: MatSnackBar,
+    private authService: AuthenticationService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadUserKycDocuments();
+  }
+
+  loadUserKycDocuments(): void {
+    this.authService.getUserIdentifiant().subscribe({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      next: (response: any) => {
+        if (response.data?.kycDocuments) {
+          this.userKycDocuments = response.data.kycDocuments;
+          this.updateStepsWithExistingDocuments();
+        }
+        this.calculateProgress();
+      },
+      error: (error) => {
+        console.error('Erreur chargement documents KYC:', error);
+        this.calculateProgress();
+      }
+    });
+  }
+
+  updateStepsWithExistingDocuments(): void {
+    this.hasRejectedDocuments = false;
+
+    this.kycSteps.forEach(step => {
+      const existingDoc = this.userKycDocuments.find(doc => doc.type === step.id);
+
+      if (existingDoc) {
+        step.submittedDocuments = [existingDoc];
+        step.status = existingDoc.status;
+        step.rejectionReason = existingDoc.rejectionReason;
+
+        // Marquer comme complété si le document est PENDING ou APPROVED
+        if (existingDoc.status === 'PENDING' || existingDoc.status === 'APPROVED') {
+          step.completed = true;
+          step.canSubmit = false; // Empêcher la soumission d'un nouveau document
+        }
+        // Si REJECTED, permettre la soumission d'un nouveau document
+        else if (existingDoc.status === 'REJECTED') {
+          step.completed = false;
+          step.canSubmit = true;
+          this.hasRejectedDocuments = true;
+        }
+      } else {
+        // Aucun document existant, permettre la soumission
+        step.completed = false;
+        step.canSubmit = true;
+        step.status = undefined;
+        step.rejectionReason = undefined;
+      }
+    });
+
     this.calculateProgress();
   }
 
   calculateProgress(): void {
-    const completedSteps = this.kycSteps.filter(step => step.completed).length;
+    const completedSteps = this.kycSteps.filter(step =>
+      step.completed || (step.status && step.status !== 'REJECTED')
+    ).length;
     this.progress = Math.round((completedSteps / this.kycSteps.length) * 100);
     this.allDocumentsSubmitted = this.progress === 100;
   }
@@ -126,9 +212,9 @@ export class KycVerificationComponent {
       const files = Array.from(input.files);
       const step = this.kycSteps[stepIndex];
 
-      // Empêcher l'ajout de fichiers si l'étape est déjà complétée
-      if (step.completed) {
-        this.snackbar.open('Cette étape est déjà complétée. Vous ne pouvez pas ajouter de nouveaux fichiers.', 'Fermer', {
+      // Empêcher l'ajout de fichiers si l'étape ne permet pas la soumission
+      if (!step.canSubmit) {
+        this.snackbar.open('Vous ne pouvez pas ajouter de fichiers pour cette étape.', 'Fermer', {
           duration: 3000
         });
         return;
@@ -167,9 +253,9 @@ export class KycVerificationComponent {
   removeFile(stepIndex: number, fileIndex: number): void {
     const step = this.kycSteps[stepIndex];
 
-    // Empêcher la suppression si l'étape est déjà complétée
-    if (step.completed) {
-      this.snackbar.open('Cette étape est déjà complétée. Vous ne pouvez pas modifier les fichiers.', 'Fermer', {
+    // Empêcher la suppression si l'étape ne permet pas la modification
+    if (!step.canSubmit) {
+      this.snackbar.open('Vous ne pouvez pas modifier les fichiers pour cette étape.', 'Fermer', {
         duration: 3000
       });
       return;
@@ -186,9 +272,9 @@ export class KycVerificationComponent {
   uploadStepDocuments(stepIndex: number): void {
     const step = this.kycSteps[stepIndex];
 
-    // Empêcher l'upload si l'étape est déjà complétée
-    if (step.completed) {
-      this.snackbar.open('Cette étape est déjà complétée.', 'Fermer', {
+    // Empêcher l'upload si l'étape ne permet pas la soumission
+    if (!step.canSubmit) {
+      this.snackbar.open('Vous ne pouvez pas soumettre de documents pour cette étape.', 'Fermer', {
         duration: 3000
       });
       return;
@@ -217,12 +303,19 @@ export class KycVerificationComponent {
         if (isSuccess) {
           step.uploadSuccess = true;
           step.completed = true;
-          step.submittedDocuments = response.data; // Stocker les documents soumis
+          step.canSubmit = false; // Empêcher les nouvelles soumissions
+          step.submittedDocuments = response.data;
+          step.status = 'PENDING'; // Statut par défaut après soumission
+          step.rejectionReason = undefined;
+
           this.calculateProgress();
 
           this.snackbar.open(response.message || 'Documents uploadés avec succès !', 'Fermer', {
             duration: 3000
           });
+
+          // Recharger les documents utilisateur pour mettre à jour l'état
+          this.loadUserKycDocuments();
 
           // Passer automatiquement à l'étape suivante si ce n'est pas la dernière
           if (this.currentStep < this.kycSteps.length - 1) {
@@ -277,15 +370,42 @@ export class KycVerificationComponent {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
+  getStatusIcon(status: string): string {
+    switch (status) {
+      case 'APPROVED': return 'check_circle';
+      case 'REJECTED': return 'cancel';
+      case 'PENDING': return 'schedule';
+      default: return 'help';
+    }
+  }
+
+  getStatusColor(status: string): string {
+    switch (status) {
+      case 'APPROVED': return '#4caf50';
+      case 'REJECTED': return '#f44336';
+      case 'PENDING': return '#ff9800';
+      default: return '#9e9e9e';
+    }
+  }
+
+  getStatusText(status: string): string {
+    switch (status) {
+      case 'APPROVED': return 'Approuvé';
+      case 'REJECTED': return 'Rejeté';
+      case 'PENDING': return 'En attente';
+      default: return 'Inconnu';
+    }
+  }
+
   // Méthode pour gérer le drag & drop
   onDrop(event: DragEvent, stepIndex: number): void {
     event.preventDefault();
 
     const step = this.kycSteps[stepIndex];
 
-    // Empêcher le drop si l'étape est déjà complétée
-    if (step.completed) {
-      this.snackbar.open('Cette étape est déjà complétée. Vous ne pouvez pas ajouter de nouveaux fichiers.', 'Fermer', {
+    // Empêcher le drop si l'étape ne permet pas la soumission
+    if (!step.canSubmit) {
+      this.snackbar.open('Vous ne pouvez pas ajouter de fichiers pour cette étape.', 'Fermer', {
         duration: 3000
       });
       return;
@@ -302,25 +422,10 @@ export class KycVerificationComponent {
   }
 
   get completedStepsCount(): number {
-    return this.kycSteps.filter(s => s.completed).length;
+    return this.kycSteps.filter(s => s.completed || (s.status && s.status !== 'REJECTED')).length;
   }
 
   get currentStepData(): KycStep {
     return this.kycSteps[this.currentStep];
-  }
-
-  // Méthode pour réinitialiser une étape (optionnel, pour l'admin)
-  resetStep(stepIndex: number): void {
-    const step = this.kycSteps[stepIndex];
-    step.files = [];
-    step.completed = false;
-    step.uploadSuccess = false;
-    step.isUploading = false;
-    step.submittedDocuments = [];
-    this.calculateProgress();
-
-    this.snackbar.open('Étape réinitialisée', 'Fermer', {
-      duration: 2000
-    });
   }
 }

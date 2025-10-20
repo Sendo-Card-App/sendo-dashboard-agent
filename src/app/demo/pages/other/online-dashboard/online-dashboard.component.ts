@@ -74,6 +74,7 @@ export class OnlineDashboardComponent implements OnInit {
     walletStats: WalletStats;
   topWallets: WalletTop[] = [];
   currencySymbol = 'XAF';
+  isverifiedkyc = false;
 
   constructor(
     private statisticsService: AdminService, // Injectez le service dans le constructeur
@@ -85,6 +86,21 @@ export class OnlineDashboardComponent implements OnInit {
   ngOnInit(): void {
      this.loadStatistics();
      this.loadWalletData();
+      this.loadUserKycDocuments();
+  }
+
+  loadUserKycDocuments(): void {
+    this.Auth.getUserIdentifiant().subscribe({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      next: (response: any) => {
+        if (response.data?.isVerifiedKYC === true) {
+          this.isverifiedkyc = true;
+        }
+      },
+      error: (error) => {
+        console.error('Erreur chargement KYC:', error);
+      }
+    });
   }
 
  // Dans votre composant.ts

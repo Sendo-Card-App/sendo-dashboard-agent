@@ -50,7 +50,7 @@
   </div>
 
   <!-- Section de vérification en bas de sidebar -->
-  <div class="verification-banner">
+  <div class="verification-banner" *ngIf="!isverifiedkyc">
     <app-card [showHeader]="false" cardClass="verification-card" padding="16" style="background-color: #c2410c !important;" >
       <div class="verification-content">
         <div class="verification-text">

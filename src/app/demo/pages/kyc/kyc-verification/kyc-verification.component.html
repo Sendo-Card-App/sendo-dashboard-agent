@@ -5,6 +5,17 @@
     <p class="kyc-subtitle">Type de compte</p>
   </div>
 
+  <!-- Bannière d'alerte pour les documents rejetés -->
+  @if (hasRejectedDocuments) {
+    <div class="rejection-alert">
+      <mat-icon class="alert-icon">warning</mat-icon>
+      <div class="alert-content">
+        <h3>Documents à corriger</h3>
+        <p>Certains de vos documents ont été rejetés. Veuillez les télécharger à nouveau en suivant les instructions.</p>
+      </div>
+    </div>
+  }
+
   <div class="kyc-content">
     <!-- Section gauche : Progression et étapes -->
     <div class="kyc-sidebar">
@@ -28,6 +39,7 @@
             [class.active]="currentStep === i"
             [class.completed]="step.completed"
             [class.upload-success]="step.uploadSuccess"
+            [class.rejected]="step.status === 'REJECTED'"
             (click)="navigateToStep(i)">
             <div class="step-icon">
               <mat-icon>{{ step.icon }}</mat-icon>
@@ -48,23 +60,31 @@
                     Documents envoyés
                   </span>
                 }
-                @if (step.files.length > 0 && !step.uploadSuccess && !step.isUploading) {
+                @if (step.status) {
+                  <span class="status-indicator" [style.background]="getStatusColor(step.status)">
+                    <mat-icon>{{ getStatusIcon(step.status) }}</mat-icon>
+                    {{ getStatusText(step.status) }}
+                  </span>
+                }
+                @if (step.files.length > 0 && !step.uploadSuccess && !step.isUploading && step.canSubmit) {
                   <span class="files-ready-indicator">
                     <mat-icon>file_present</mat-icon>
                     {{ step.files.length }} fichier(s) prêt(s)
                   </span>
                 }
-                @if (step.completed && step.submittedDocuments && step.submittedDocuments.length > 0) {
-                  <span class="submitted-indicator">
-                    <mat-icon>verified</mat-icon>
-                    {{ step.submittedDocuments.length }} document(s) soumis
+                @if (step.status === 'REJECTED' && step.rejectionReason) {
+                  <span class="rejection-reason">
+                    <mat-icon>info</mat-icon>
+                    {{ step.rejectionReason }}
                   </span>
                 }
               </div>
             </div>
             <div class="step-status">
-              @if (step.completed) {
+              @if (step.completed && step.status !== 'REJECTED') {
                 <mat-icon class="completed-icon">check_circle</mat-icon>
+              } @else if (step.status === 'REJECTED') {
+                <mat-icon class="rejected-icon">cancel</mat-icon>
               } @else {
                 <div class="step-number">{{ i + 1 }}</div>
               }
@@ -104,10 +124,10 @@
             <div>
               <mat-card-title>{{ currentStepData.title }}</mat-card-title>
               <mat-card-subtitle>{{ currentStepData.description }}</mat-card-subtitle>
-              @if (currentStepData.completed) {
-                <div class="step-completed-badge">
-                  <mat-icon>verified</mat-icon>
-                  <span>Cette étape est complétée</span>
+              @if (currentStepData.status) {
+                <div class="step-status-badge" [style.background]="getStatusColor(currentStepData.status)">
+                  <mat-icon>{{ getStatusIcon(currentStepData.status) }}</mat-icon>
+                  <span>{{ getStatusText(currentStepData.status) }}</span>
                 </div>
               }
             </div>
@@ -115,22 +135,44 @@
         </mat-card-header>
 
         <mat-card-content>
-          <!-- Message d'étape complétée -->
-          @if (currentStepData.completed) {
-            <div class="completed-step-message">
-              <mat-icon class="success-icon">check_circle</mat-icon>
+          <!-- Message pour documents existants -->
+          @if (currentStepData.submittedDocuments && currentStepData.submittedDocuments.length > 0 && !currentStepData.canSubmit) {
+            <div class="existing-documents-message" [class.rejected]="currentStepData.status === 'REJECTED'">
+              <mat-icon class="message-icon">{{
+                currentStepData.status === 'APPROVED' ? 'check_circle' :
+                currentStepData.status === 'REJECTED' ? 'warning' : 'schedule'
+              }}</mat-icon>
               <div class="message-content">
-                <h4>Étape terminée</h4>
-                <p>Vous avez déjà soumis vos documents pour cette étape. Ils sont en cours de vérification.</p>
-                @if (currentStepData.submittedDocuments && currentStepData.submittedDocuments.length > 0) {
+                <h4>
+                  {{
+                    currentStepData.status === 'APPROVED' ? 'Document approuvé' :
+                    currentStepData.status === 'REJECTED' ? 'Document rejeté' : 'Document en attente de vérification'
+                  }}
+                </h4>
+                <p>
+                  {{
+                    currentStepData.status === 'APPROVED' ? 'Votre document a été approuvé. Aucune action requise.' :
+                    currentStepData.status === 'REJECTED' ? 'Votre document a été rejeté. Veuillez télécharger un nouveau document en suivant les instructions.' :
+                    'Votre document est en cours de vérification. Vous serez notifié une fois la vérification terminée.'
+                  }}
+                </p>
+
+                @if (currentStepData.status === 'REJECTED' && currentStepData.rejectionReason) {
+                  <div class="rejection-details">
+                    <strong>Raison du rejet :</strong>
+                    <p>{{ currentStepData.rejectionReason }}</p>
+                  </div>
+                }
+
+                @if (currentStepData.submittedDocuments.length > 0) {
                   <div class="submitted-documents">
-                    <strong>Documents soumis :</strong>
+                    <strong>Document soumis :</strong>
                     <ul>
                       @for (doc of currentStepData.submittedDocuments; track doc.id) {
                         <li>
                           <a [href]="doc.url" target="_blank" class="document-link">
                             <mat-icon>link</mat-icon>
-                            Document {{ $index + 1 }} ({{ doc.status }})
+                            Voir le document ({{ getStatusText(doc.status) }})
                           </a>
                         </li>
                       }
@@ -139,7 +181,10 @@
                 }
               </div>
             </div>
-          } @else {
+          }
+
+          <!-- Interface d'upload (seulement si canSubmit est true) -->
+          @if (currentStepData.canSubmit) {
             <!-- Instructions -->
             <div class="upload-instructions">
               <mat-icon>info</mat-icon>
@@ -159,13 +204,13 @@
                 accept="image/*,.pdf"
                 (change)="onFileSelected($event, currentStep)"
                 class="file-input"
-                [disabled]="currentStepData.completed">
+                [disabled]="!currentStepData.canSubmit">
 
-              <div class="drop-zone-content" [class.disabled]="currentStepData.completed">
+              <div class="drop-zone-content" [class.disabled]="!currentStepData.canSubmit">
                 <mat-icon class="upload-icon">cloud_upload</mat-icon>
                 <h3>Glissez-déposez vos fichiers ici</h3>
                 <p>ou</p>
-                <button mat-stroked-button type="button" (click)="fileInput.click()" [disabled]="currentStepData.completed">
+                <button mat-stroked-button type="button" (click)="fileInput.click()" [disabled]="!currentStepData.canSubmit">
                   <mat-icon>attach_file</mat-icon>
                   Parcourir les fichiers
                 </button>
@@ -192,7 +237,7 @@
                         color="warn"
                         (click)="removeFile(currentStep, i)"
                         class="remove-button"
-                        [disabled]="currentStepData.isUploading || currentStepData.completed">
+                        [disabled]="currentStepData.isUploading || !currentStepData.canSubmit">
                         <mat-icon>delete</mat-icon>
                       </button>
                     </div>
@@ -217,9 +262,9 @@
             }
           </div>
 
-          <!-- Bouton d'upload -->
+          <!-- Bouton d'upload (seulement si canSubmit est true) -->
           <div class="upload-action">
-            @if (!currentStepData.completed && currentStepData.files.length > 0 && !currentStepData.uploadSuccess) {
+            @if (currentStepData.canSubmit && currentStepData.files.length > 0 && !currentStepData.uploadSuccess) {
               <button
                 mat-flat-button
                 color="primary"
@@ -246,7 +291,7 @@
 
           <!-- Navigation suivante -->
           <div class="next-button">
-            @if (currentStep < kycSteps.length - 1 && (currentStepData.uploadSuccess || currentStepData.completed)) {
+            @if (currentStep < kycSteps.length - 1 && (currentStepData.uploadSuccess || currentStepData.completed || !currentStepData.canSubmit)) {
               <button
                 mat-stroked-button
                 (click)="navigateToStep(currentStep + 1)"

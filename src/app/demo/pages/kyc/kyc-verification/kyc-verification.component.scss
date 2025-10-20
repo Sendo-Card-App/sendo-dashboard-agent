@@ -705,3 +705,191 @@
     border-color: transparent;
   }
 }
+
+// Ajouter ces styles à kyc-verification.component.scss
+
+/* Bannière d'alerte pour les documents rejetés */
+.rejection-alert {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #fff3e0, #ffecb3);
+  border: 1px solid #ff9800;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+
+  .alert-icon {
+    color: #ff9800;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
+
+  .alert-content {
+    h3 {
+      margin: 0 0 4px 0;
+      color: #e65100;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    p {
+      margin: 0;
+      color: #bf360c;
+      font-size: 14px;
+    }
+  }
+}
+
+/* Indicateurs de statut dans les étapes */
+.step-item.rejected {
+  border-left: 4px solid #f44336;
+  background: #ffebee;
+}
+
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: white;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.rejection-reason {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: #d32f2f;
+  background: #ffebee;
+  margin-top: 4px;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.rejected-icon {
+  color: #f44336;
+}
+
+/* Badge de statut dans l'en-tête */
+.step-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 8px;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Message pour documents existants */
+.existing-documents-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+
+  &.rejected {
+    background: #ffebee;
+    border-color: #f44336;
+  }
+
+  .message-icon {
+    color: #4caf50;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+
+    .rejected & {
+      color: #f44336;
+    }
+  }
+
+  .message-content {
+    h4 {
+      margin: 0 0 8px 0;
+      color: #333;
+      font-weight: 600;
+    }
+
+    p {
+      margin: 0 0 12px 0;
+      color: #666;
+      line-height: 1.4;
+    }
+  }
+
+  .rejection-details {
+    background: white;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+
+    strong {
+      color: #d32f2f;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    p {
+      margin: 0;
+      color: #666;
+      font-style: italic;
+    }
+  }
+}
+
+/* Améliorations pour les indicateurs de statut */
+.step-status-indicators {
+  .status-indicator {
+    margin-top: 4px;
+  }
+}
+
+/* Désactivation visuelle améliorée */
+.drop-zone-content.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+
+  * {
+    pointer-events: none;
+  }
+}
+
+/* Animation pour le spinner */
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

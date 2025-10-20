@@ -1,13 +1,13 @@
 <div class="row">
   <!-- welcome.component.html -->
-<section class="welcome-section">
+<section class="welcome-section" *ngIf="!isverifiedkyc">
   <div class="container">
     <h1 class="welcome-title">👋 Vérification d'identité</h1>
     <p class="welcome-subtitle">Finalisez votre inscription en vérifiant votre identité. Cette étape est obligatoire pour accéder à toutes les fonctionnalités.</p>
 
     <div class="actions-container">
       <a routerLink="/verification" class="action-btn primary"> Commencer la vérification</a>
-      <a routerLink="/documentation" class="action-btn secondary"> Guide de vérification</a>
+      <!-- <a routerLink="/documentation" class="action-btn secondary"> Guide de vérification</a> -->
     </div>
   </div>
 </section>
