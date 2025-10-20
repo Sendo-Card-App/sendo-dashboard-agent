@@ -1,6 +1,6 @@
 // Angular import
-import { Component, effect, inject, input } from '@angular/core';
-import { Location, LocationStrategy } from '@angular/common';
+import { Component, effect, inject, input, OnInit } from '@angular/core';
+import { CommonModule, Location, LocationStrategy } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 
 // project import
@@ -34,11 +34,11 @@ interface PersonalDetail {
 }
 @Component({
   selector: 'app-vertical-menu',
-  imports: [SharedModule, MenuGroupVerticalComponent, MenuItemVerticalComponent, MenuCollapseComponent, RouterModule],
+  imports: [SharedModule, MenuGroupVerticalComponent, MenuItemVerticalComponent, MenuCollapseComponent, RouterModule, CommonModule],
   templateUrl: './vertical-menu.component.html',
   styleUrls: ['./vertical-menu.component.scss']
 })
-export class VerticalMenuComponent {
+export class VerticalMenuComponent implements OnInit {
   private location = inject(Location);
   private locationStrategy = inject(LocationStrategy);
   private themeService = inject(ThemeLayoutService);
@@ -55,9 +55,10 @@ export class VerticalMenuComponent {
   showContent = true;
   direction: string = 'ltr';
   userName: string = '';
+  isverifiedkyc = false;
 
   // Constructor
-  constructor(private router: Router) {
+  constructor(private router: Router, private Auth: AuthenticationService) {
     effect(() => {
       this.updateThemeLayout(this.themeService.layout());
     });
@@ -66,6 +67,24 @@ export class VerticalMenuComponent {
     });
     const userData = JSON.parse(localStorage.getItem('user-info') || '{}');
     this.userName = [userData.firstname, userData.lastname].filter(Boolean).join(' ');
+  }
+
+  ngOnInit(): void {
+    this.loadUserKycDocuments();
+  }
+
+  loadUserKycDocuments(): void {
+    this.Auth.getUserIdentifiant().subscribe({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      next: (response: any) => {
+        if (response.data?.isVerifiedKYC === true) {
+          this.isverifiedkyc = true;
+        }
+      },
+      error: (error) => {
+        console.error('Erreur chargement KYC:', error);
+      }
+    });
   }
 
   // public method
