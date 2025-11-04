@@ -131,3 +131,385 @@
     }
   }
 }
+
+// Styles pour les filtres
+.filter-card {
+  margin-bottom: 1rem;
+
+  .filter-content {
+    .form-label {
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+
+      &:focus {
+        border-color: #218366;
+        box-shadow: 0 0 0 2px rgba(33, 131, 102, 0.2);
+      }
+    }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      font-weight: 500;
+
+      &.btn-primary {
+        background: #218366;
+        border-color: #218366;
+
+        &:hover {
+          background: #1a6b4f;
+          border-color: #1a6b4f;
+        }
+      }
+    }
+  }
+}
+
+// Informations du marchand
+.merchant-info {
+  .merchant-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+
+    .merchant-avatar {
+      width: 60px;
+      height: 60px;
+      background: #218366;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-right: 1rem;
+    }
+
+    .merchant-details {
+      .merchant-name {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333;
+      }
+
+      .merchant-email,
+      .merchant-phone {
+        margin: 0.2rem 0;
+        color: #666;
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .merchant-stats {
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #f0f0f0;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .stat-label {
+        color: #666;
+        font-weight: 500;
+      }
+
+      .stat-value {
+        font-weight: 500;
+        color: #333;
+
+        &.highlight {
+          color: #218366;
+          font-weight: 600;
+        }
+
+        &.status-badge {
+          padding: 0.25rem 0.75rem;
+          border-radius: 15px;
+          font-size: 0.8rem;
+          font-weight: 500;
+
+          &.active {
+            background: #e8f5e9;
+            color: #2e7d32;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Frais récents
+.recent-fees {
+  .fees-list {
+    .fee-item {
+      display: flex;
+      align-items: center;
+      padding: 1rem 0;
+      border-bottom: 1px solid #f0f0f0;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .fee-icon {
+        width: 40px;
+        height: 40px;
+        background: #f8f9fa;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        color: #218366;
+      }
+
+      .fee-content {
+        flex: 1;
+
+        .fee-amount {
+          font-weight: 600;
+          color: #333;
+          font-size: 1.1rem;
+          margin-bottom: 0.25rem;
+        }
+
+        .fee-details {
+          display: flex;
+          justify-content: space-between;
+          font-size: 0.85rem;
+          color: #666;
+          margin-bottom: 0.5rem;
+
+          .fee-id {
+            font-family: 'Courier New', monospace;
+          }
+        }
+
+        .fee-status {
+          font-size: 0.8rem;
+          padding: 0.2rem 0.6rem;
+          border-radius: 10px;
+          display: inline-block;
+          font-weight: 500;
+
+          &.status-completed {
+            background: #e8f5e9;
+            color: #2e7d32;
+          }
+
+          &.status-pending {
+            background: #fff3e0;
+            color: #e65100;
+          }
+
+          &.status-failed {
+            background: #ffebee;
+            color: #c62828;
+          }
+        }
+      }
+    }
+
+    .no-fees {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+
+      i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        display: block;
+        opacity: 0.5;
+      }
+
+      span {
+        font-size: 0.9rem;
+      }
+    }
+  }
+}
+
+// Graphiques
+.chart-container {
+  padding: 1rem 0;
+}
+
+.balance-chart {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 200px;
+
+  .chart-visual {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+  }
+
+  .doughnut-chart {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: conic-gradient(
+      #218366 0% 70%,
+      #FF9800 70% 90%,
+      #2196F3 90% 100%
+    );
+
+    .chart-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      background: white;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      .chart-total {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #218366;
+        line-height: 1;
+      }
+
+      .chart-label {
+        font-size: 0.7rem;
+        color: #666;
+        margin-top: 0.2rem;
+      }
+    }
+  }
+
+  .chart-legend {
+    flex: 1;
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+
+      .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+        margin-right: 0.75rem;
+      }
+
+      .legend-text {
+        display: flex;
+        justify-content: space-between;
+        flex: 1;
+
+        .legend-label {
+          font-size: 0.9rem;
+          color: #333;
+        }
+
+        .legend-value {
+          font-weight: 600;
+          color: #218366;
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+}
+
+.trends-chart {
+  height: 200px;
+  display: flex;
+  align-items: flex-end;
+
+  .chart-bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    height: 150px;
+    width: 100%;
+
+    .bar-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+
+      .bar {
+        background: #218366;
+        border-radius: 4px 4px 0 0;
+        width: 30px;
+        position: relative;
+        transition: all 0.3s ease;
+        min-height: 10px;
+
+        &:hover {
+          background: #1a6b4f;
+        }
+
+        .bar-value {
+          position: absolute;
+          top: -20px;
+          left: 50%;
+          transform: translateX(-50%);
+          font-size: 0.7rem;
+          font-weight: 600;
+          color: #218366;
+        }
+      }
+
+      .bar-label {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        color: #666;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .balance-chart {
+    flex-direction: column;
+    height: auto;
+
+    .chart-legend {
+      margin-top: 1rem;
+      width: 100%;
+    }
+  }
+
+  .merchant-header {
+    flex-direction: column;
+    text-align: center;
+
+    .merchant-avatar {
+      margin-right: 0;
+      margin-bottom: 1rem;
+    }
+  }
+
+  .fee-content .fee-details {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
