@@ -51,6 +51,16 @@ const routes: Routes = [
         loadComponent: () => import('./demo/pages/other/online-dashboard/online-dashboard.component').then((c) => c.OnlineDashboardComponent),
         // data: { roles: ['MERCHANT'] }
       },
+      {
+        path: 'transaction',
+        loadComponent: () => import('./demo/pages/transaction/paiement/paiement.component').then((c) => c.PaiementComponent),
+        // data: { roles: ['MERCHANT'] }
+      },
+      {
+        path: 'transaction/:id',
+        loadComponent: () => import('./demo/pages/transaction/paiement-detail/paiement-detail.component').then((c) => c.PaiementDetailComponent),
+        // data: { roles: ['MERCHANT'] }
+      },
        {
         path: 'verification',
         loadComponent: () => import('./demo/pages/kyc/kyc-verification/kyc-verification.component').then((c) => c.KycVerificationComponent),

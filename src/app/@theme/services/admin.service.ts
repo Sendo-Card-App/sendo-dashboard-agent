@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { BaseResponse, ChangeUserStatusRequest, RemoveRoleRequest } from '../models';
-import { StatisticsResponse } from '../models/statistics';
+// import { StatisticsResponse } from '../models/statistics';
 
 export interface Role {
   id: number;
@@ -111,10 +111,10 @@ export class AdminService {
 
   removeUserRole(request: RemoveRoleRequest): Observable<BaseResponse> {
     return this.http.delete<BaseResponse>(
-      `${this.apiUrl}/users/remove-role `,
-      {  ...this.getConfigAuthorized(),
+      `${this.apiUrl}/users/remove-role`,
+      { ...this.getConfigAuthorized(),
         body: request
-       }, // Note: pour DELETE avec body
+      } // Note: pour DELETE avec body
     );
   }
 
@@ -122,10 +122,21 @@ export class AdminService {
    * GET /admin/statistics
    * Récupère toutes les statistiques du système
    */
-  getStatistics(): Observable<StatisticsResponse> {
-    return this.http.get<StatisticsResponse>(
-      `${this.apiUrl}/statistics`,
-      this.getConfigAuthorized()
+  getStatistics(merchantId: number, startDate?: string,
+    endDate?: string): Observable<BaseResponse> {
+    let params = new HttpParams();
+    if (startDate) {
+      params = params.set('startDate', startDate);
+    }
+    if (endDate) {
+      params = params.set('endDate', endDate);
+    }
+    return this.http.get<BaseResponse>(
+      `${this.apiUrl}/statistics/merchant/${merchantId}`,
+      {
+        ...this.getConfigAuthorized(),
+        params
+      }
     );
   }
 
@@ -150,8 +161,8 @@ export class AdminService {
     return this.http.get<any>(
       `${this.apiUrl}/commission`,
       {
+        params,
         ...this.getConfigAuthorized(),
-        params
       }
     );
   }

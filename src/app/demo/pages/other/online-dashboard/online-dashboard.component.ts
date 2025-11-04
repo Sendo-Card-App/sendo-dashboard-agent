@@ -1,92 +1,100 @@
 import { AuthenticationService } from './../../../../@theme/services/authentication.service';
-// angular import
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 // project import
 import { SharedModule } from 'src/app/demo/shared/shared.module';
-// import { StatisticsChartComponent } from '../../../pages/apex-chart/statistics-chart/statistics-chart.component';
-// import { InvitesGoalChartComponent } from './invites-goal-chart/invites-goal-chart.component';
-// import { TotalRevenueLineChartComponent } from './total-revenue-line-chart/total-revenue-line-chart.component';
-// import { StudentStatesChartComponent } from './student-states-chart/student-states-chart.component';
-// import { ActivityLineChartComponent } from './activity-line-chart/activity-line-chart.component';
-import { activityData } from 'src/app/fake-data/activity_data';
-// import { VisitorsBarChartComponent } from './visitors-bar-chart/visitors-bar-chart.component';
-// import { EarningCoursesLineChartComponent } from './earning-courses-line-chart/earning-courses-line-chart.component';
-// import { CourseReportBarChartComponent } from './course-report-bar-chart/course-report-bar-chart.component';
-// import { RequestFundsChartComponent } from './request-funds-stats/course-report-bar-chart.component';
-// import { TontineStatsComponent } from './tontine-stats/tontine-stats.component';
-import { courseStatesData } from 'src/app/fake-data/courseStates_data';
-import { AdminService } from 'src/app/@theme/services/admin.service'; // Importez votre service
-import { DashboardSummaryItem, StatisticsData, StatisticsResponse, WalletStats, WalletTop } from 'src/app/@theme/models/statistics'; // Importez votre interface
-// import { CardStatsComponent } from './card-stats/card-stats.component';
+import { AdminService } from 'src/app/@theme/services/admin.service';
 
-export interface activity_Data {
-  image: string;
-  name: string;
-  qualification: string;
-  rating: string;
+export interface StatisticsData {
+  merchant: {
+    id: number;
+    balance: number;
+    typeAccount: string;
+    status: string;
+    user: {
+      name: string;
+      email: string;
+      phone: string;
+    };
+  };
+  summary: {
+    totalFees: number;
+    totalWithdrawn: number;
+    availableBalance: number;
+    pendingWithdrawals: number;
+    totalTransactions: number;
+  };
+  recentFees: Array<{
+    id: number;
+    amount: number;
+    isWithdrawn: boolean;
+    createdAt: string;
+    transaction: {
+      id: string;
+      amount: number;
+      status: string;
+    };
+  }>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  recentWithdrawals: Array<any>;
 }
 
-export interface courseStates_data {
-  name: string;
-  teacher: string;
-  rating: number;
-  earning: string;
-  sale: string;
+export interface DashboardSummaryItem {
+  icon: string;
+  background: string;
+  title: string;
+  value: string;
+  percentage?: string;
+  color?: string;
+  trend?: 'up' | 'down' | 'stable';
 }
-
-const activity_Data = activityData;
-const courseStates_data = courseStatesData;
 
 @Component({
   selector: 'app-online-dashboard',
   imports: [
     SharedModule,
     CommonModule,
-    // StatisticsChartComponent,
-    // InvitesGoalChartComponent,
-    // CourseReportBarChartComponent,
-    // StudentStatesChartComponent,
-    // CardStatsComponent,
-    // ActivityLineChartComponent,
-    // VisitorsBarChartComponent,
-    // EarningCoursesLineChartComponent,
     RouterModule,
-    // RequestFundsChartComponent,
-    // TontineStatsComponent
+    FormsModule
   ],
   templateUrl: './online-dashboard.component.html',
   styleUrls: ['./online-dashboard.component.scss']
 })
 export class OnlineDashboardComponent implements OnInit {
 
-  // public props
-  selected: Date | null;
-
-  activity: string[] = ['Name', 'Qualification', 'Rating'];
-  activitySource = activity_Data;
-
-  courseStates: string[] = ['Name', 'Teacher', 'Rating', 'Earning', 'Sale', 'Action'];
-  courseSource = courseStates_data;
-   dashboard_summary: DashboardSummaryItem[] = [];
-    walletStats: WalletStats;
-  topWallets: WalletTop[] = [];
-  currencySymbol = 'XAF';
+  // Propriétés existantes
   isverifiedkyc = false;
+  currencySymbol = 'XAF';
+
+  // Nouvelles propriétés pour les statistiques
+  statisticsData: StatisticsData | null = null;
+  isLoading = false;
+  dateFilter = {
+    startDate: '',
+    endDate: ''
+  };
+
+  // Données pour les graphiques
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  balanceDistributionData: any = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  transactionTrendsData: any = {};
+
+  // Cartes de résumé
+  dashboard_summary: DashboardSummaryItem[] = [];
 
   constructor(
-    private statisticsService: AdminService, // Injectez le service dans le constructeur
+    private adminService: AdminService,
     private Auth: AuthenticationService
-  ) {
-    this.selected = new Date();
-  }
+  ) {}
 
   ngOnInit(): void {
-     this.loadStatistics();
-     this.loadWalletData();
-      this.loadUserKycDocuments();
+    this.loadUserKycDocuments();
+    this.loadStatistics();
+    this.initializeChartData();
   }
 
   loadUserKycDocuments(): void {
@@ -103,35 +111,132 @@ export class OnlineDashboardComponent implements OnInit {
     });
   }
 
- // Dans votre composant.ts
-loadStatistics(): void {
-    this.statisticsService.getStatistics().subscribe({
-      next: (response: StatisticsResponse) => {
-        this.updateDashboardSummary(response.data);
-        // Vous pouvez aussi mettre à jour d'autres parties du dashboard ici
+  loadStatistics(): void {
+    this.isLoading = true;
 
-        // console.log('Statistics loaded:', response.data);
-      },
-      error: (err) => {
-        if (err === "Token invalide") {
-          this.Auth.clearSession();
-          window.location.reload();
+    this.Auth.getUserIdentifiant().subscribe({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      next: (userResponse: any) => {
+        const merchantId = userResponse.data.merchant?.id;
+
+        if (!merchantId) {
+          console.error('ID marchand non trouvé');
+          this.isLoading = false;
+          return;
         }
+
+        this.adminService.getStatistics(
+          merchantId,
+          this.dateFilter.startDate || undefined,
+          this.dateFilter.endDate || undefined
+        ).subscribe({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          next: (response: any) => {
+            this.statisticsData = response.data;
+            this.updateDashboardSummary();
+            this.updateChartData();
+            this.isLoading = false;
+          },
+          error: (error) => {
+            console.error('Erreur chargement statistiques:', error);
+            this.isLoading = false;
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Erreur récupération utilisateur:', error);
+        this.isLoading = false;
       }
     });
   }
 
-    private loadWalletData() {
-    this.statisticsService.getStatistics().subscribe({
-      next: (response) => {
-        this.walletStats = response.data.walletStats;
-        this.topWallets = this.walletStats.topWallets.map((wallet: WalletTop) => ({
-          ...wallet,
-          formattedBalance: this.formatCurrency(wallet.balance)
-        }));
+  applyFilters(): void {
+    this.loadStatistics();
+  }
+
+  clearFilters(): void {
+    this.dateFilter = {
+      startDate: '',
+      endDate: ''
+    };
+    this.loadStatistics();
+  }
+
+  private updateDashboardSummary(): void {
+    if (!this.statisticsData) return;
+
+    const { summary } = this.statisticsData;
+
+    this.dashboard_summary = [
+      {
+        icon: '#custom-card',
+        background: 'bg-primary-50 text-primary-500',
+        title: 'Solde Disponible',
+        value: this.formatCurrency(summary.availableBalance),
+        percentage: '+2.5%',
+        color: 'text-success',
+        trend: 'up'
       },
-      error: (err) => console.error('Failed to load wallet data', err)
-    });
+      {
+        icon: '#custom-receipt',
+        background: 'bg-success-50 text-success-500',
+        title: 'Total Transactions',
+        value: summary.totalTransactions.toString(),
+        percentage: '+12.5%',
+        color: 'text-success',
+        trend: 'up'
+      },
+      {
+        icon: '#custom-money',
+        background: 'bg-warning-50 text-warning-500',
+        title: 'Frais Totaux',
+        value: this.formatCurrency(summary.totalFees),
+        percentage: '-5.2%',
+        color: 'text-warn-500',
+        trend: 'down'
+      },
+      {
+        icon: '#custom-wallet',
+        background: 'bg-info-50 text-info-500',
+        title: 'Retraits en Attente',
+        value: this.formatCurrency(summary.pendingWithdrawals),
+        percentage: '0%',
+        color: 'text-info-500',
+        trend: 'stable'
+      }
+    ];
+  }
+
+  private initializeChartData(): void {
+    // Données par défaut pour les graphiques
+    this.balanceDistributionData = {
+      series: [70, 20, 10],
+      labels: ['Disponible', 'Frais', 'En attente'],
+      colors: ['#218366', '#FF9800', '#2196F3']
+    };
+
+    this.transactionTrendsData = {
+      series: [30, 40, 35, 50, 49, 60, 70],
+      categories: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
+    };
+  }
+
+  private updateChartData(): void {
+    if (!this.statisticsData) return;
+
+    const { summary, merchant } = this.statisticsData;
+
+    // Mise à jour du graphique de répartition
+    const total = merchant.balance;
+    const availablePercent = (summary.availableBalance / total) * 100;
+    const feesPercent = (summary.totalFees / total) * 100;
+    const pendingPercent = (summary.pendingWithdrawals / total) * 100;
+
+    this.balanceDistributionData = {
+      series: [availablePercent, feesPercent, pendingPercent],
+      labels: ['Disponible', 'Frais', 'En attente'],
+      colors: ['#218366', '#FF9800', '#2196F3']
+    };
   }
 
   private formatCurrency(amount: number): string {
@@ -142,174 +247,31 @@ loadStatistics(): void {
     }).format(amount);
   }
 
-  getFormattedTotalBalance(): string {
-    return this.formatCurrency(this.walletStats?.totalBalance || 0);
+  formatDate(dateString: string): string {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   }
 
-  getFormattedAverageBalance(): string {
-    return this.formatCurrency(this.walletStats?.averageBalance || 0);
-  }
-
-  private updateDashboardSummary(data: StatisticsData): void {
-    this.dashboard_summary = [
-      {
-        icon: '#custom-profile-2user-outline',
-        background: 'bg-primary-50 text-primary-500',
-        title: 'Total Users',
-        value: `${data.userStats.totalUsers}`,
-        percentage: this.calculateUserGrowth(data.userStats.dailyRegistrations),
-        color: 'text-success'
-      },
-      {
-        icon: '#custom-card',
-        background: 'bg-warning-50 text-warning-500',
-        title: 'Total Wallets',
-        value: `${data.walletStats.totalWallets}`,
-        percentage: this.calculateWalletGrowth(),
-        color: 'text-warning-500'
-      },
-      {
-        icon: '#custom-eye',
-        background: 'bg-success-50 text-success-500',
-        title: 'Total Transactions',
-        value: `${data.transactionStats.totalTransactions}`,
-        percentage: this.calculateTransactionGrowth(),
-        color: 'text-success-500'
-      },
-      {
-        icon: '#book',
-        background: 'bg-warn-50 text-warn-500',
-        title: 'Total Requests',
-        value: `${data.requestStats.totalRequests}`,
-        percentage: this.calculateRequestGrowth(),
-        color: 'text-warn-500'
-      }
-    ];
-  }
-
-  private calculateUserGrowth(dailyRegistrations: { date: string; count: number }[]): string {
-    if (!dailyRegistrations || dailyRegistrations.length < 2) return '0%';
-
-    const recent = dailyRegistrations[dailyRegistrations.length - 1].count;
-    const previous = dailyRegistrations[dailyRegistrations.length - 2].count;
-
-    return this.calculateGrowthPercentage(recent, previous);
-  }
-
-  private calculateWalletGrowth(): string {
-
-    return '12.5%'; // Remplacez par votre logique réelle
-  }
-
-  private calculateTransactionGrowth(): string {
-
-    // const total = transactionStats.totalTransactions;
-    // const avg = transactionStats.averageAmount;
-    return '8.3%'; // Remplacez par votre logique réelle
-  }
-
-  private calculateRequestGrowth(): string {
-
-    return '5.2%'; // Remplacez par votre logique réelle
-  }
-
-  private calculateGrowthPercentage(current: number, previous: number): string {
-    if (previous === 0) return '100%';
-    const growth = ((current - previous) / previous) * 100;
-    return `${growth.toFixed(1)}%`;
-  }
-
-  course_list = [
-    {
-      title: 'Bootstrap 5 Beginner Course',
-      image: 'assets/images/admin/img-bootstrap.svg'
-    },
-    {
-      title: 'PHP Training Course',
-      image: 'assets/images/admin/img-php.svg'
-    },
-    {
-      title: 'UI/UX Training Course',
-      image: 'assets/images/admin/img-ux.svg'
-    },
-    {
-      title: 'Web Designing Course',
-      image: 'assets/images/admin/img-web.svg'
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'COMPLETED': return 'status-completed';
+      case 'PENDING': return 'status-pending';
+      case 'FAILED': return 'status-failed';
+      default: return 'status-unknown';
     }
-  ];
-
-  queriesList = [
-    {
-      image: 'assets/images/user/avatar-2.png',
-      title: 'Python $ Data Manage'
-    },
-    {
-      image: 'assets/images/user/avatar-1.png',
-      title: 'Website Error'
-    },
-    {
-      image: 'assets/images/user/avatar-3.png',
-      title: 'How to Illustrate'
-    },
-    {
-      image: 'assets/images/user/avatar-4.jpg',
-      title: 'PHP Learning'
-    }
-  ];
-
-  trendingCourse = [
-    {
-      image: 'assets/images/admin/img-bootstrap.svg',
-      title: 'Bootstrap 5 Beginner Course'
-    },
-    {
-      image: 'assets/images/admin/img-php.svg',
-      title: 'PHP Training Course'
-    },
-    {
-      image: 'assets/images/admin/img-ux.svg',
-      title: 'UI/UX Training Course'
-    },
-    {
-      image: 'assets/images/admin/img-web.svg',
-      title: 'Web Designing Course'
-    },
-    {
-      image: 'assets/images/admin/img-c.svg',
-      title: 'C Training Course'
-    }
-  ];
-
-  notificationList = [
-    {
-      image: 'assets/images/user/avatar-1.png',
-      title: 'Report Successfully',
-      time: 'Today | 9:00 AM'
-    },
-    {
-      image: 'assets/images/user/avatar-5.jpg',
-      title: 'Reminder: Test time',
-      time: 'Yesterday | 6:30 PM'
-    },
-    {
-      image: 'assets/images/user/avatar-3.png',
-      title: 'Send course pdf',
-      time: '05 Feb | 3:45 PM'
-    },
-    {
-      image: 'assets/images/user/avatar-2.png',
-      title: 'Report Successfully',
-      time: '05 Feb | 4:00 PM'
-    }
-  ];
-
-  startVerification() {
-    // Logique pour démarrer la vérification KYC
-    console.log('Démarrage de la vérification KYC');
   }
 
-  showGuide() {
-    // Logique pour afficher le guide
-    console.log('Affichage du guide de vérification');
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'COMPLETED': return 'Terminé';
+      case 'PENDING': return 'En attente';
+      case 'FAILED': return 'Échoué';
+      default: return status;
+    }
   }
 }

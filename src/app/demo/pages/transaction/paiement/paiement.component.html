@@ -1,0 +1,421 @@
+<div class="row p-t-25">
+  <!-- En-tête avec bouton de transfert -->
+<div class="row p-t-25">
+  <!-- En-tête avec boutons -->
+  <div class="col-12">
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="page-title">Transactions</h1>
+        <div class="header-actions">
+          <button
+            class="btn-withdrawal"
+            (click)="showWithdrawalSection = !showWithdrawalSection; showTransferSection = false"
+            [class.active]="showWithdrawalSection">
+            <i class="ti ti-cash"></i>
+            Initier un retrait
+          </button>
+          <button
+            class="btn-transfer"
+            (click)="showTransferSection = !showTransferSection; showWithdrawalSection = false"
+            [class.active]="showTransferSection">
+            <i class="ti ti-send"></i>
+            Effectuer un transfert
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section de retrait avec overlay -->
+  <div *ngIf="showWithdrawalSection" class="transfer-overlay">
+    <div class="transfer-modal">
+      <div class="transfer-card">
+        <div class="transfer-header">
+          <h3>Nouveau retrait</h3>
+          <button class="btn-close" (click)="cancelWithdrawal()">
+            <i class="ti ti-x"></i>
+          </button>
+        </div>
+
+        <div class="transfer-form">
+          <!-- Champ téléphone -->
+          <div class="form-group">
+            <label for="phone">Numéro de téléphone</label>
+            <input
+              id="phone"
+              type="tel"
+              [(ngModel)]="withdrawalData.phone"
+              placeholder="Entrez le numéro de téléphone"
+              class="form-input"
+              [class.error]="withdrawalError"
+            >
+            <div *ngIf="withdrawalError" class="error-message">{{ withdrawalError }}</div>
+          </div>
+
+          <!-- Champ montant -->
+          <div class="form-group">
+            <label for="withdrawalAmount">Montant à retirer (XAF)</label>
+            <input
+              id="withdrawalAmount"
+              type="number"
+              [(ngModel)]="withdrawalData.amount"
+              placeholder="0"
+              class="form-input"
+              min="1"
+            >
+          </div>
+
+          <!-- Actions du retrait -->
+          <div class="transfer-actions">
+            <button
+              class="btn-cancel"
+              (click)="cancelWithdrawal()">
+              Annuler
+            </button>
+            <button
+              class="btn-confirm"
+              (click)="initiateWithdrawal()"
+              [disabled]="!withdrawalData.phone || !withdrawalData.amount || withdrawalData.amount <= 0">
+              Confirmer le retrait
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section de transfert avec overlay -->
+  <div *ngIf="showTransferSection" class="transfer-overlay">
+    <!-- ... (le reste du code transfert existant reste inchangé) ... -->
+  </div>
+
+  <!-- Le reste du code HTML reste inchangé -->
+
+  <!-- Section de transfert avec overlay -->
+  <div *ngIf="showTransferSection" class="transfer-overlay">
+    <div class="transfer-modal">
+      <div class="transfer-card">
+        <div class="transfer-header">
+          <h3>Nouveau transfert</h3>
+          <button class="btn-close" (click)="cancelTransfer()">
+            <i class="ti ti-x"></i>
+          </button>
+        </div>
+
+        <div class="transfer-form">
+          <!-- Champ matricule -->
+          <div class="form-group">
+            <label for="toWallet">Matricule du destinataire</label>
+            <div class="input-with-button">
+              <input
+                id="toWallet"
+                type="text"
+                [(ngModel)]="transferData.toWallet"
+                placeholder="Entrez le matricule"
+                class="form-input"
+                [class.error]="walletError"
+              >
+              <button
+                class="btn-verify"
+                (click)="verifyWallet()"
+                [disabled]="!transferData.toWallet || isVerifyingWallet">
+                <span *ngIf="!isVerifyingWallet">Vérifier</span>
+                <span *ngIf="isVerifyingWallet" class="loading">
+                  <i class="ti ti-loader"></i>
+                </span>
+              </button>
+            </div>
+            <div *ngIf="walletError" class="error-message">{{ walletError }}</div>
+          </div>
+
+          <!-- Informations du wallet vérifié -->
+          <div *ngIf="walletInfo" class="wallet-info-card">
+            <div class="wallet-user">
+              <div class="avatar-circle" [style.background]="createStableAvatar(walletInfo.user.firstname + walletInfo.user.lastname).color">
+                {{ createStableAvatar(walletInfo.user.firstname + walletInfo.user.lastname).letter }}
+              </div>
+              <div class="user-details">
+                <div class="user-name f-w-600">{{ walletInfo.user.firstname }} {{ walletInfo.user.lastname }}</div>
+                <div class="user-email text-muted">{{ walletInfo.user.email }}</div>
+                <div class="wallet-balance mat-caption">
+                  Solde: {{ formatCurrency(walletInfo.balance) }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Champ montant -->
+          <div class="form-group">
+            <label for="amount">Montant (XAF)</label>
+            <input
+              id="amount"
+              type="number"
+              [(ngModel)]="transferData.amount"
+              placeholder="0"
+              class="form-input"
+              min="1"
+            >
+          </div>
+
+          <!-- Actions du transfert -->
+          <div class="transfer-actions">
+            <button
+              class="btn-cancel"
+              (click)="cancelTransfer()">
+              Annuler
+            </button>
+            <button
+              class="btn-confirm"
+              (click)="initiateTransfer()"
+              [disabled]="!walletInfo || !transferData.amount || transferData.amount <= 0">
+              Confirmer le transfert
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtres inspirés de UtMerchantComponent -->
+  <div class="col-12">
+    <div class="filter-section">
+      <div class="row">
+        <!-- Search Field -->
+        <div class="col-md-3">
+          <div class="search-field">
+            <input
+              type="text"
+              placeholder="Rechercher une transaction..."
+              (keyup)="applySearch($event.target.value)"
+              class="form-input"
+            >
+          </div>
+        </div>
+
+        <!-- Status Filter -->
+        <div class="col-md-3">
+          <select [(ngModel)]="filters.status" (change)="applyFilters()" class="form-select">
+            <option value="">Tous les statuts</option>
+            <option value="PENDING">En attente</option>
+            <option value="COMPLETED">Terminé</option>
+            <option value="FAILED">Échoué</option>
+            <option value="BLOCKED">Bloqué</option>
+          </select>
+        </div>
+
+        <!-- Date Filters -->
+        <div class="col-md-3">
+          <input
+            type="date"
+            [(ngModel)]="filters.startDate"
+            (change)="applyFilters()"
+            class="form-input"
+            placeholder="Date de début"
+          >
+        </div>
+
+        <div class="col-md-2">
+          <input
+            type="date"
+            [(ngModel)]="filters.endDate"
+            (change)="applyFilters()"
+            class="form-input"
+            placeholder="Date de fin"
+          >
+        </div>
+
+        <!-- Reset Button -->
+        <div class="col-md-1">
+          <button class="btn-reset" (click)="clearFilters()" type="button">
+            <i class="ti ti-filter-off"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Liste des transactions -->
+  <div class="col-12">
+    <div class="transactions-card">
+      <div class="card-header">
+        <h3 class="card-title">Historique des transactions</h3>
+        <div class="total-info">
+          {{ totalItems }} transaction(s) au total
+        </div>
+      </div>
+
+      <div class="card-body">
+        <!-- Loading state -->
+        <div *ngIf="isLoading" class="loading-overlay">
+          <div class="loading-content">
+            <mat-spinner diameter="50"></mat-spinner>
+            <div class="loading-text">Chargement des transactions...</div>
+          </div>
+        </div>
+
+        <!-- Tableau des transactions -->
+        <div *ngIf="!isLoading" class="table-responsive">
+          <table class="transactions-table">
+            <thead>
+              <tr>
+                <th>ID Transaction</th>
+                <th>Montant</th>
+                <th>Statut</th>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let transaction of transactions" class="table-row">
+                <td class="transaction-id">
+                  {{ transaction.transaction?.transactionId || transaction.id }}
+                </td>
+                <td class="amount f-w-600">
+                  {{ formatCurrency(transaction.amount) }}
+                </td>
+                <td>
+                  <div class="status-container">
+                    <i class="ti status-icon" [class]="getStatusIcon(transaction.transaction?.status || transaction.status)"
+                       [style.color]="getStatusColor(transaction.transaction?.status || transaction.status)"></i>
+                    <span class="status-badge" [style.background]="getStatusColor(transaction.transaction?.status || transaction.status)">
+                      {{ transaction.transaction?.status || transaction.status }}
+                    </span>
+                  </div>
+                </td>
+                <td class="date text-nowrap">
+                  {{ formatDate(transaction.createdAt) }}
+                </td>
+                <td class="description">
+                  {{ transaction.transaction?.description || 'Transfert de fonds' }}
+                </td>
+                <td class="description">
+                  <ul class="list-inline p-l-0">
+                      <li class="list-inline-item m-r-10" matTooltip="Voir">
+                        <a [routerLink]="['/transaction',  transaction.id]" class="avatar avatar-xs text-muted">
+                          <i class="ti ti-eye f-18"></i>
+                        </a>
+                      </li>
+                    </ul>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Message vide -->
+          <div *ngIf="transactions.length === 0 && !isLoading" class="no-data-message">
+            <i class="ti ti-receipt-off no-data-icon"></i>
+            <p>Aucune transaction trouvée</p>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="!isLoading && transactions.length > 0" class="pagination-section">
+          <mat-paginator [length]="totalItems"
+                        [pageSize]="itemsPerPage"
+                        [pageSizeOptions]="[5, 10, 25, 100]"
+                        [pageIndex]="currentPage - 1"
+                        (page)="onPageChange($event)"
+                        showFirstLastButtons>
+          </mat-paginator>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de confirmation PIN avec overlay -->
+<div *ngIf="showPinModal" class="pin-modal-overlay">
+  <div class="pin-modal-container">
+    <div class="pin-modal-content">
+      <!-- En-tête -->
+      <div class="pin-modal-header">
+        <div class="pin-icon">
+          <i class="ti ti-lock"></i>
+        </div>
+        <h2 class="pin-modal-title">
+          {{ currentAction === 'transfer' ? 'Confirmer le transfert' : 'Confirmer le retrait' }}
+        </h2>
+        <p class="pin-modal-subtitle">
+          Veuillez saisir votre code PIN à 4 chiffres pour confirmer
+          <span *ngIf="currentAction === 'transfer'">
+            le transfert de <strong>{{ formatCurrency(transferData.amount!) }}</strong> à
+            <strong>{{ walletInfo?.user.firstname }} {{ walletInfo?.user.lastname }}</strong>
+          </span>
+          <span *ngIf="currentAction === 'withdrawal'">
+            le retrait de <strong>{{ formatCurrency(withdrawalData.amount!) }}</strong> vers
+            <strong>{{ withdrawalData.phone }}</strong>
+          </span>
+        </p>
+      </div>
+
+      <!-- Champ PIN -->
+      <div class="pin-input-container">
+        <div class="pin-input-group">
+          <input
+            #pinInput1
+            type="password"
+            maxlength="1"
+            class="pin-digit"
+            (input)="onPinInput(0, $event, pinInput2)"
+            (keydown)="onPinKeyDown(0, $event)"
+            pattern="[0-9]"
+          >
+          <input
+            #pinInput2
+            type="password"
+            maxlength="1"
+            class="pin-digit"
+            (input)="onPinInput(1, $event, pinInput3)"
+            (keydown)="onPinKeyDown(1, $event)"
+            pattern="[0-9]"
+          >
+          <input
+            #pinInput3
+            type="password"
+            maxlength="1"
+            class="pin-digit"
+            (input)="onPinInput(2, $event, pinInput4)"
+            (keydown)="onPinKeyDown(2, $event)"
+            pattern="[0-9]"
+          >
+          <input
+            #pinInput4
+            type="password"
+            maxlength="1"
+            class="pin-digit"
+            (input)="onPinInput(3, $event, null)"
+            (keydown)="onPinKeyDown(3, $event)"
+            pattern="[0-9]"
+          >
+        </div>
+
+        <!-- Message d'erreur -->
+        <div *ngIf="pinError" class="pin-error-message">
+          {{ pinError }}
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="pin-modal-actions">
+        <button
+          class="btn btn-outline pin-cancel-btn"
+          [disabled]="isProcessingTransfer || isProcessingWithdrawal"
+          (click)="closePinModal()">
+          Annuler
+        </button>
+        <button
+          class="btn btn-primary pin-confirm-btn"
+          [disabled]="!isPinComplete || isProcessingTransfer || isProcessingWithdrawal"
+          (click)="confirmWithPin()">
+          <span *ngIf="!isProcessingTransfer && !isProcessingWithdrawal">
+            {{ currentAction === 'transfer' ? 'Confirmer le transfert' : 'Confirmer le retrait' }}
+          </span>
+          <span *ngIf="isProcessingTransfer || isProcessingWithdrawal" class="loading">
+            <i class="ti ti-loader"></i> Traitement...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

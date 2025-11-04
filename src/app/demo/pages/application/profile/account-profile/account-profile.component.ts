@@ -45,12 +45,12 @@ export class AccountProfileComponent implements OnInit {
       // },
 
 
-      // {
-      //   label: 'Settings',
-      //   link: '/application/profile/account/settings',
-      //   icon: 'ti ti-settings',
-      //   index: 5
-      // }
+      {
+        label: 'Pincode',
+        link: '/profile/account/settings',
+        icon: 'ti ti-settings',
+        index: 2
+      }
     ];
   }
 

@@ -17,6 +17,15 @@ export const menus: Navigation[] = [
         url: '/dashboard',
         icon: '#custom-status-up'
       },
+
+      {
+        id: 'transaction-page',
+        title: 'Transaction',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/transaction',
+        icon: '#custom-presentation-chart'
+      },
     ]
   },
 

@@ -1,0 +1,239 @@
+<div class="paiement-detail-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p>Chargement des détails...</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="transaction" class="transaction-detail">
+    <!-- Header -->
+    <div class="detail-header">
+      <button class="back-button" (click)="goBack()">
+        <i class="ti ti-arrow-left"></i>
+        Retour
+      </button>
+      <h1 class="detail-title">Détails de la transaction</h1>
+      <div class="transaction-ref">
+        Réf: {{ transaction.transaction.transactionId || transaction.id }}
+      </div>
+    </div>
+
+    <!-- Two-column Layout -->
+    <div class="detail-content">
+      <!-- Left Column - Summary -->
+      <div class="left-column">
+        <mat-card class="summary-card">
+          <div class="card-header">
+            <h2>Résumé de la transaction</h2>
+          </div>
+
+          <div class="summary-content">
+            <div class="summary-item">
+              <span class="label">Montant total</span>
+              <span class="value highlight">
+                {{ formatCurrency(transaction.transaction.totalAmount || transaction.amount) }}
+              </span>
+            </div>
+
+            <div class="summary-item">
+              <span class="label">Statut</span>
+              <span class="value">
+                <span [class]="'status-badge ' + getStatusClass(transaction.transaction.status)">
+                  {{ getStatusLabel(transaction.transaction.status) }}
+                </span>
+              </span>
+            </div>
+
+            <div class="summary-item">
+              <span class="label">Type</span>
+              <span class="value">{{ transaction.transaction.type || 'N/A' }}</span>
+            </div>
+
+            <div class="summary-item">
+              <span class="label">Date</span>
+              <span class="value">{{ formatDate(transaction.createdAt) }}</span>
+            </div>
+
+            <div class="summary-item">
+              <span class="label">Méthode</span>
+              <span class="value">{{ transaction.transaction.method || 'N/A' }}</span>
+            </div>
+
+            <div class="summary-item">
+              <span class="label">Provider</span>
+              <span class="value">{{ transaction.transaction.provider || 'N/A' }}</span>
+            </div>
+          </div>
+        </mat-card>
+
+        <!-- Fees Information -->
+        <mat-card class="fees-card">
+          <div class="card-header">
+            <h2>Détails des frais</h2>
+          </div>
+
+          <div class="fees-content">
+            <div class="fee-item">
+              <span class="label">Montant principal</span>
+              <span class="value">{{ formatCurrency(transaction.amount) }}</span>
+            </div>
+
+            <div class="fee-item" *ngIf="transaction.transaction.sendoFees">
+              <span class="label">Frais Sendo</span>
+              <span class="value">{{ formatCurrency(transaction.transaction.sendoFees) }}</span>
+            </div>
+
+            <div class="fee-item" *ngIf="transaction.transaction.partnerFees">
+              <span class="label">Frais partenaire</span>
+              <span class="value">{{ formatCurrency(transaction.transaction.partnerFees) }}</span>
+            </div>
+
+            <div class="fee-item" *ngIf="transaction.transaction.tva">
+              <span class="label">TVA</span>
+              <span class="value">{{ formatCurrency(transaction.transaction.tva) }}</span>
+            </div>
+
+            <div class="fee-item total" *ngIf="transaction.transaction.totalAmount">
+              <span class="label">Total</span>
+              <span class="value highlight">{{ formatCurrency(transaction.transaction.totalAmount) }}</span>
+            </div>
+          </div>
+        </mat-card>
+      </div>
+
+      <!-- Right Column - Details -->
+      <div class="right-column">
+        <!-- Transaction Information -->
+        <mat-card class="info-card">
+          <div class="card-header">
+            <h2>Informations transaction</h2>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Référence transaction</span>
+              <span class="value">
+                {{ transaction.transaction.transactionReference || 'N/A' }}
+                <button *ngIf="transaction.transaction.transactionReference"
+                        class="copy-btn"
+                        (click)="copyToClipboard(transaction.transaction.transactionReference)">
+                  <i class="ti ti-copy"></i>
+                </button>
+              </span>
+            </div>
+
+            <div class="info-item">
+              <span class="label">Devise</span>
+              <span class="value">{{ transaction.transaction.currency || 'XAF' }}</span>
+            </div>
+
+            <div class="info-item">
+              <span class="label">Taux de change</span>
+              <span class="value">{{ transaction.transaction.exchangeRates || '1.0' }}</span>
+            </div>
+
+            <div class="info-item">
+              <span class="label">Tentatives</span>
+              <span class="value">{{ transaction.transaction.retryCount || 0 }}</span>
+            </div>
+
+            <div class="info-item">
+              <span class="label">Dernière vérification</span>
+              <span class="value">
+                {{ transaction.transaction.lastChecked ? formatDate(transaction.transaction.lastChecked) : 'N/A' }}
+              </span>
+            </div>
+          </div>
+        </mat-card>
+
+        <!-- Bank Information (if available) -->
+        <mat-card class="bank-card" *ngIf="transaction.transaction.bankName || transaction.transaction.accountNumber">
+          <div class="card-header">
+            <h2>Informations bancaires</h2>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Banque</span>
+              <span class="value">{{ transaction.transaction.bankName || 'N/A' }}</span>
+            </div>
+
+            <div class="info-item">
+              <span class="label">Numéro de compte</span>
+              <span class="value">
+                {{ transaction.transaction.accountNumber || 'N/A' }}
+                <button *ngIf="transaction.transaction.accountNumber"
+                        class="copy-btn"
+                        (click)="copyToClipboard(transaction.transaction.accountNumber)">
+                  <i class="ti ti-copy"></i>
+                </button>
+              </span>
+            </div>
+          </div>
+        </mat-card>
+
+        <!-- Additional Information -->
+        <mat-card class="additional-card">
+          <div class="card-header">
+            <h2>Informations complémentaires</h2>
+          </div>
+
+          <div class="additional-content">
+            <div class="info-item full-width">
+              <span class="label">Description</span>
+              <p class="value description">
+                {{ transaction.transaction.description || 'Aucune description fournie' }}
+              </p>
+            </div>
+
+            <div class="info-item">
+              <span class="label">ID Receveur</span>
+              <span class="value">{{ transaction.transaction.receiverId || 'N/A' }}</span>
+            </div>
+
+            <div class="info-item">
+              <span class="label">Type receveur</span>
+              <span class="value">{{ transaction.transaction.receiverType || 'N/A' }}</span>
+            </div>
+
+            <div class="info-item">
+              <span class="label">Carte virtuelle</span>
+              <span class="value">{{ transaction.transaction.virtualCardId || 'N/A' }}</span>
+            </div>
+
+            <div class="info-item">
+              <span class="label">ID Utilisateur</span>
+              <span class="value">{{ transaction.transaction.userId || 'N/A' }}</span>
+            </div>
+          </div>
+        </mat-card>
+
+        <!-- Timeline -->
+        <mat-card class="timeline-card">
+          <div class="card-header">
+            <h2>Historique</h2>
+          </div>
+
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <span class="timeline-date">Créé le {{ formatDate(transaction.createdAt) }}</span>
+                <span class="timeline-action">Transaction créée</span>
+              </div>
+            </div>
+
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <span class="timeline-date">Modifié le {{ formatDate(transaction.updatedAt) }}</span>
+                <span class="timeline-action">Dernière mise à jour</span>
+              </div>
+            </div>
+          </div>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>
