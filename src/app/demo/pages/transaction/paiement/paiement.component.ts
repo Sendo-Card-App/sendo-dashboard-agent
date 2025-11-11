@@ -333,7 +333,7 @@ export class PaiementComponent implements OnInit {
       error: (error) => {
         this.isProcessingTransfer = false;
 
-        if (error.status === 403 && error.message?.includes('pincode')) {
+        if (error('Passcode')) {
           this.pinError = 'Code PIN incorrect ou non configuré';
           this.snackBar.open('Code PIN incorrect ou non configuré', 'Fermer', {
             duration: 5000,
@@ -341,7 +341,7 @@ export class PaiementComponent implements OnInit {
           });
         } else {
           this.pinError = 'Erreur lors du transfert';
-          this.snackBar.open('Erreur lors du transfert: ' + (error.message || 'Erreur inconnue'), 'Fermer', {
+          this.snackBar.open('Erreur lors du transfert: ' + (error || 'Erreur inconnue'), 'Fermer', {
             duration: 5000,
             panelClass: ['error-snackbar']
           });
@@ -386,8 +386,9 @@ export class PaiementComponent implements OnInit {
           },
           error: (error) => {
             this.isProcessingWithdrawal = false;
+            console.log('Erreur retrait:', error);
 
-            if (error.status === 403 && error.message?.includes('pincode')) {
+            if (error.includes('Passcode')) {
               this.pinError = 'Code PIN incorrect ou non configuré';
               this.snackBar.open('Code PIN incorrect ou non configuré', 'Fermer', {
                 duration: 5000,
@@ -395,7 +396,7 @@ export class PaiementComponent implements OnInit {
               });
             } else {
               this.pinError = 'Erreur lors du retrait';
-              this.snackBar.open('Erreur lors du retrait: ' + (error.message || 'Erreur inconnue'), 'Fermer', {
+              this.snackBar.open('Erreur lors du retrait: ' + (error || 'Erreur inconnue'), 'Fermer', {
                 duration: 5000,
                 panelClass: ['error-snackbar']
               });

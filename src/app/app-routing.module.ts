@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AdminComponent } from './demo/layout/admin';
 import { EmptyComponent } from './demo/layout/empty/empty.component';
-// import { RoleGuard } from './@theme/helpers/role.guards';
+import { RoleGuard } from './@theme/helpers/role.guards';
 import { AlreadyLoggedInGuard } from './@theme/helpers/already-logged-in.guard';
 
 const routes: Routes = [
@@ -44,7 +44,7 @@ const routes: Routes = [
   {
     path: '',
     component: AdminComponent,
-    // canActivateChild: [RoleGuard],
+    canActivateChild: [RoleGuard],
     children: [
       {
         path: 'dashboard',

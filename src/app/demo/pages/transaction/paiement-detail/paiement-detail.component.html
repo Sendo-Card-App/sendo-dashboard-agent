@@ -76,7 +76,7 @@
           <div class="fees-content">
             <div class="fee-item">
               <span class="label">Montant principal</span>
-              <span class="value">{{ formatCurrency(transaction.amount) }}</span>
+              <span class="value">{{ formatCurrency(transaction.transaction.totalAmount) }}</span>
             </div>
 
             <div class="fee-item" *ngIf="transaction.transaction.sendoFees">
@@ -85,7 +85,7 @@
             </div>
 
             <div class="fee-item" *ngIf="transaction.transaction.partnerFees">
-              <span class="label">Frais partenaire</span>
+              <span class="label">Commissions</span>
               <span class="value">{{ formatCurrency(transaction.transaction.partnerFees) }}</span>
             </div>
 
@@ -96,7 +96,7 @@
 
             <div class="fee-item total" *ngIf="transaction.transaction.totalAmount">
               <span class="label">Total</span>
-              <span class="value highlight">{{ formatCurrency(transaction.transaction.totalAmount) }}</span>
+              <span class="value highlight">{{ formatCurrency(transaction.transaction.totalAmount + transaction.amount) }}</span>
             </div>
           </div>
         </mat-card>
@@ -104,8 +104,7 @@
 
       <!-- Right Column - Details -->
       <div class="right-column">
-        <!-- Transaction Information -->
-        <mat-card class="info-card">
+        <!-- <mat-card class="info-card">
           <div class="card-header">
             <h2>Informations transaction</h2>
           </div>
@@ -145,7 +144,7 @@
               </span>
             </div>
           </div>
-        </mat-card>
+        </mat-card> -->
 
         <!-- Bank Information (if available) -->
         <mat-card class="bank-card" *ngIf="transaction.transaction.bankName || transaction.transaction.accountNumber">
@@ -197,20 +196,20 @@
               <span class="value">{{ transaction.transaction.receiverType || 'N/A' }}</span>
             </div>
 
-            <div class="info-item">
+            <!-- <div class="info-item">
               <span class="label">Carte virtuelle</span>
               <span class="value">{{ transaction.transaction.virtualCardId || 'N/A' }}</span>
-            </div>
+            </div> -->
 
-            <div class="info-item">
+            <!-- <div class="info-item">
               <span class="label">ID Utilisateur</span>
               <span class="value">{{ transaction.transaction.userId || 'N/A' }}</span>
-            </div>
+            </div> -->
           </div>
         </mat-card>
 
         <!-- Timeline -->
-        <mat-card class="timeline-card">
+        <!-- <mat-card class="timeline-card">
           <div class="card-header">
             <h2>Historique</h2>
           </div>
@@ -232,7 +231,7 @@
               </div>
             </div>
           </div>
-        </mat-card>
+        </mat-card> -->
       </div>
     </div>
   </div>

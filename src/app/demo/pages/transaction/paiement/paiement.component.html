@@ -19,7 +19,7 @@
             (click)="showTransferSection = !showTransferSection; showWithdrawalSection = false"
             [class.active]="showTransferSection">
             <i class="ti ti-send"></i>
-            Effectuer un transfert
+            Effectuer un dépôt
           </button>
         </div>
       </div>
@@ -260,6 +260,7 @@
               <tr>
                 <th>ID Transaction</th>
                 <th>Montant</th>
+                <th>Commissions</th>
                 <th>Statut</th>
                 <th>Date</th>
                 <th>Description</th>
@@ -272,7 +273,10 @@
                   {{ transaction.transaction?.transactionId || transaction.id }}
                 </td>
                 <td class="amount f-w-600">
-                  {{ formatCurrency(transaction.amount) }}
+                  {{ formatCurrency(transaction.transaction.totalAmount) }}
+                </td>
+                <td class="fees">
+                  {{ formatCurrency(transaction.amount || 0) }}
                 </td>
                 <td>
                   <div class="status-container">
