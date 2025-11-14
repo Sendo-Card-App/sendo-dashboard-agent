@@ -6,7 +6,8 @@ import {
   MerchantTransactionsResponse,
   TransferFundsPayload,
   TransferFundsResponse,
-  Wallet
+  Wallet,
+  WithdrawalListResponse
 } from '../models/merchant.model';
 import { environment } from 'src/environments/environment';
 import { BaseResponse } from '../models';
@@ -15,9 +16,9 @@ import { BaseResponse } from '../models';
   providedIn: 'root'
 })
 export class MerchantService {
-    private baseUrl = `${environment.apiUrl}`;
+  private baseUrl = `${environment.apiUrl}`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * 🔹 Récupère toutes les transactions d’un marchand
@@ -59,58 +60,83 @@ export class MerchantService {
     return this.http.get<{ status: number; message: string; data: MerchantTransaction }>(url, this.getConfigAuthorized());
   }
 
-   getWalletById(walletId: string): Observable<{ status: number; message: string; data: Wallet }> {
+  getWalletById(walletId: string): Observable<{ status: number; message: string; data: Wallet }> {
     const url = `${this.baseUrl}/wallet/${walletId}`;
     return this.http.get<{ status: number; message: string; data: Wallet }>(url, this.getConfigAuthorized());
   }
 
   withdrawRequest(payload: {
-  phone: string;
-  amountToWithdraw: number;
-  idMerchant: number;
-}, pinCode: string): Observable<BaseResponse<null>> {
-  return this.http.post<BaseResponse<null>>(
-    `${this.baseUrl}/merchant/withdrawal-request`,
-    payload,
-    this.getConfigAuthorizedPinCode(pinCode)
-  );
-}
+    phone: string;
+    amountToWithdraw: number;
+    idMerchant: number;
+  }, pinCode: string): Observable<BaseResponse<null>> {
+    return this.http.post<BaseResponse<null>>(
+      `${this.baseUrl}/merchant/withdrawal-request`,
+      payload,
+      this.getConfigAuthorizedPinCode(pinCode)
+    );
+  }
+
+  getWithdrawalRequests(
+    idMerchant: number,
+    page: number = 1,
+    limit: number = 10,
+    status?: string
+  ): Observable<WithdrawalListResponse> {
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const params: any = {
+      idMerchant,
+      page,
+      limit
+    };
+
+    if (status) {
+      params.status = status;
+    }
+
+    return this.http.get<WithdrawalListResponse>(
+      `${this.baseUrl}/merchant/withdrawal-request/all`,
+      { params, ...this.getConfigAuthorized() }
+    );
+  }
+
 
 
   private getConfigAuthorized() {
-      const dataRegistered = localStorage.getItem('login-sendo') || '{}'
-      const data = JSON.parse(dataRegistered)
-      return {
-        headers: new HttpHeaders(
-          {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
-            "Content-Type": "application/json",
-            'Authorization': `Bearer ${data.accessToken}`
-          }
-        )
-      }
+    const dataRegistered = localStorage.getItem('login-sendo') || '{}'
+    const data = JSON.parse(dataRegistered)
+    return {
+      headers: new HttpHeaders(
+        {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${data.accessToken}`
+        }
+      )
     }
-
-   private getConfigAuthorizedPinCode(passcode?: string) {
-  const dataRegistered = localStorage.getItem('login-sendo') || '{}';
-  const data = JSON.parse(dataRegistered);
-
-  const headersConfig: { [header: string]: string } = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${data.accessToken}`,
-  };
-
-  // 👉 Si un passcode est fourni, on l’ajoute dans le header
-  if (passcode) {
-    headersConfig['X-Passcode'] = passcode;
   }
 
-  return {
-    headers: new HttpHeaders(headersConfig)
-  };
-}
+  private getConfigAuthorizedPinCode(passcode?: string) {
+    const dataRegistered = localStorage.getItem('login-sendo') || '{}';
+    const data = JSON.parse(dataRegistered);
+
+    const headersConfig: { [header: string]: string } = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${data.accessToken}`,
+    };
+
+    // 👉 Si un passcode est fourni, on l’ajoute dans le header
+    if (passcode) {
+      headersConfig['X-Passcode'] = passcode;
+    }
+
+    return {
+      headers: new HttpHeaders(headersConfig)
+    };
+  }
 
 }

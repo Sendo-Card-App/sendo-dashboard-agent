@@ -61,7 +61,12 @@ const routes: Routes = [
         loadComponent: () => import('./demo/pages/transaction/paiement-detail/paiement-detail.component').then((c) => c.PaiementDetailComponent),
         // data: { roles: ['MERCHANT'] }
       },
-       {
+      {
+        path: 'withdrawal',
+        loadComponent: () => import('./demo/pages/withdrawal/withdrawal-request/withdrawal-request.component').then((c) => c.WithdrawalRequestComponent),
+        // data: { roles: ['MERCHANT'] }
+      },
+      {
         path: 'verification',
         loadComponent: () => import('./demo/pages/kyc/kyc-verification/kyc-verification.component').then((c) => c.KycVerificationComponent),
         // data: { roles: ['MERCHANT'] }
@@ -85,4 +90,4 @@ const routes: Routes = [
   ],
   exports: [RouterModule]
 })
-export class AppRoutingModule {}
+export class AppRoutingModule { }
