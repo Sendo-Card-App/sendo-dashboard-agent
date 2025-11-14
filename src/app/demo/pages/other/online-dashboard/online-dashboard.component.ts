@@ -189,7 +189,7 @@ export class OnlineDashboardComponent implements OnInit {
       {
         icon: '#custom-money',
         background: 'bg-warning-50 text-warning-500',
-        title: 'Frais Totaux',
+        title: 'Total commission',
         value: this.formatCurrency(summary.totalFees),
         percentage: '-5.2%',
         color: 'text-warn-500',

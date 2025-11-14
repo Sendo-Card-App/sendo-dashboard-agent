@@ -116,7 +116,7 @@
 
       <!-- Frais récents -->
       <div class="col-lg-6">
-        <app-card cardTitle="Frais Récents">
+        <app-card cardTitle="Transactions Récentes">
           <div class="recent-fees" *ngIf="statisticsData">
             <div class="fees-list">
               <div class="fee-item" *ngFor="let fee of statisticsData.recentFees">
@@ -124,7 +124,8 @@
                   <i class="ti ti-receipt"></i>
                 </div>
                 <div class="fee-content">
-                  <div class="fee-amount">{{ formatCurrency(fee.amount) }}</div>
+                  <div class="fee-amount">Commission : {{ formatCurrency(fee.amount) }}</div>
+                  <div class="fee-amount">Montant : {{ formatCurrency(fee.transaction.amount) }}</div>
                   <div class="fee-details">
                     <span class="fee-id">{{ fee.transaction.id }}</span>
                     <span class="fee-date">{{ formatDate(fee.createdAt) }}</span>

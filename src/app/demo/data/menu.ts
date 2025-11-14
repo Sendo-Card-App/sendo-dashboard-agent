@@ -26,6 +26,14 @@ export const menus: Navigation[] = [
         url: '/transaction',
         icon: '#custom-presentation-chart'
       },
+      {
+        id: 'withdrawal-page',
+        title: 'Demande de Retrait',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/withdrawal',
+        icon: '#custom-document-filter'
+      },
     ]
   },
 

@@ -1,0 +1,223 @@
+<div class="withdrawal-request-container">
+  <!-- En-tête -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title"></h1>
+      <div class="header-info" *ngIf="merchantInfo">
+        <div class="merchant-badge">
+          <i class="ti ti-user"></i>
+          {{ merchantInfo.code }} - Solde: {{ formatCurrency(merchantInfo.balance) }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filter-section">
+    <div class="row">
+      <!-- Status Filter -->
+      <div class="col-md-4">
+        <div class="filter-group">
+          <label class="filter-label">Statut</label>
+          <select [(ngModel)]="filters.status" (change)="applyFilters()" class="form-select">
+            <option value="">Tous les statuts</option>
+            <option value="PENDING">En attente</option>
+            <option value="COMPLETED">Terminé</option>
+            <option value="FAILED">Échoué</option>
+            <option value="CANCELLED">Annulé</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Reset Button -->
+      <div class="col-md-2">
+        <div class="filter-group">
+          <label class="filter-label">&nbsp;</label>
+          <button class="btn-reset" (click)="clearFilters()" type="button">
+            <i class="ti ti-filter-off"></i>
+            Réinitialiser
+          </button>
+        </div>
+      </div>
+
+      <!-- Info totale -->
+      <div class="col-md-6">
+        <div class="total-info">
+          <div class="total-item">
+            <span class="total-label">Total demandes:</span>
+            <span class="total-value">{{ totalItems }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Liste des demandes de retrait -->
+  <div class="withdrawal-list-section">
+    <div class="section-card">
+      <div class="card-header">
+        <h3 class="card-title">Historique des Demandes</h3>
+      </div>
+
+      <div class="card-body">
+        <!-- Loading state -->
+        <div *ngIf="isLoading" class="loading-overlay">
+          <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Chargement des demandes...</div>
+          </div>
+        </div>
+
+        <!-- Tableau des demandes -->
+        <div *ngIf="!isLoading" class="table-responsive">
+          <table class="withdrawal-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Montant</th>
+                <th>Téléphone</th>
+                <th>Statut</th>
+                <th>Date de création</th>
+                <th>Dernière mise à jour</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let withdrawal of withdrawalRequests" class="withdrawal-row">
+                <!-- Colonne ID -->
+                <td class="withdrawal-id">
+                  <div class="id-text">#{{ withdrawal.id }}</div>
+                </td>
+
+                <!-- Colonne Montant -->
+                <td class="amount-info">
+                  <div class="amount-value f-w-600">
+                    {{ formatCurrency(withdrawal.amount) }}
+                  </div>
+                </td>
+
+                <!-- Colonne Téléphone -->
+                <td class="phone-info">
+                  <div class="phone-number">
+                    <i class="ti ti-phone"></i>
+                    {{ withdrawal.phone }}
+                  </div>
+                </td>
+
+                <!-- Colonne Statut -->
+                <td class="status-info">
+                  <div class="status-container">
+                    <i class="ti status-icon"
+                       [class]="getStatusIcon(withdrawal.status)"
+                       [style.color]="getStatusColor(withdrawal.status)"></i>
+                    <span class="status-badge"
+                          [style.background]="getStatusColor(withdrawal.status)">
+                      {{ getStatusLabel(withdrawal.status) }}
+                    </span>
+                  </div>
+                </td>
+
+                <!-- Colonne Date de création -->
+                <td class="date-info">
+                  <div class="date-text">
+                    {{ formatDate(withdrawal.createdAt) }}
+                  </div>
+                </td>
+
+                <!-- Colonne Dernière mise à jour -->
+                <td class="date-info">
+                  <div class="date-text">
+                    {{ formatDate(withdrawal.updatedAt) }}
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Message vide -->
+          <div *ngIf="withdrawalRequests.length === 0 && !isLoading" class="no-data-message">
+            <i class="ti ti-cash-off no-data-icon"></i>
+            <p>Aucune demande de retrait trouvée</p>
+            <p class="no-data-subtitle" *ngIf="filters.status">
+              avec le statut "{{ getStatusLabel(filters.status) }}"
+            </p>
+            <div class="no-data-actions">
+              <button class="btn-primary" routerLink="/paiement">
+                <i class="ti ti-plus"></i>
+                Effectuer une demande
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="!isLoading && withdrawalRequests.length > 0" class="pagination-section">
+          <mat-paginator [length]="totalItems"
+                        [pageSize]="itemsPerPage"
+                        [pageSizeOptions]="[5, 10, 25, 100]"
+                        [pageIndex]="currentPage - 1"
+                        (page)="onPageChange($event)"
+                        showFirstLastButtons>
+          </mat-paginator>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Résumé statistique -->
+  <div class="stats-section" *ngIf="withdrawalRequests.length > 0">
+    <div class="row">
+      <div class="col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon pending">
+            <i class="ti ti-clock"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">
+              {{ getWithdrawalsByStatus('PENDING').length }}
+            </div>
+            <div class="stat-label">En attente</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon completed">
+            <i class="ti ti-check"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">
+              {{ getWithdrawalsByStatus('COMPLETED').length }}
+            </div>
+            <div class="stat-label">Terminés</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon failed">
+            <i class="ti ti-x"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">
+              {{ getWithdrawalsByStatus('FAILED').length }}
+            </div>
+            <div class="stat-label">Échoués</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon cancelled">
+            <i class="ti ti-ban"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">
+              {{ getWithdrawalsByStatus('CANCELLED').length }}
+            </div>
+            <div class="stat-label">Annulés</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
