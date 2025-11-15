@@ -1,9 +1,9 @@
 module.exports = {
   apps: [
     {
-      name: 'Sendo Dashboard',
+      name: 'Sendo Agent',
       script: 'ng',
-      args: 'serve --host 0.0.0.0 --port 4200',
+      args: 'serve --host 0.0.0.0 --port 4300',
       watch: true,
       env: {
         NODE_ENV: 'development'

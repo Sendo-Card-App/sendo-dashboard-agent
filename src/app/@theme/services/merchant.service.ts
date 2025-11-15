@@ -97,7 +97,6 @@ export class MerchantService {
   const data = JSON.parse(dataRegistered);
 
   const headersConfig: { [header: string]: string } = {
-    'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${data.accessToken}`,
