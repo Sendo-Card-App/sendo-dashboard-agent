@@ -199,7 +199,7 @@ export class OnlineDashboardComponent implements OnInit {
         icon: '#custom-wallet',
         background: 'bg-info-50 text-info-500',
         title: 'Retraits en Attente',
-        value: this.formatCurrency(summary.pendingWithdrawals),
+        value: summary.pendingWithdrawals.toString(),
         percentage: '0%',
         color: 'text-info-500',
         trend: 'stable'
