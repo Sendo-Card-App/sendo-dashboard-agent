@@ -121,3 +121,45 @@ export interface StatisticsData {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   recentWithdrawals: Array<any>;
 }
+
+export interface WithdrawalUser {
+  id: number;
+  firstname: string;
+  lastname: string;
+  email: string;
+  phone: string;
+}
+
+export interface WithdrawalPartner {
+  id: number;
+  userId: number;
+  typeAccount: string;
+  balance: number;
+  code: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  user: WithdrawalUser;
+}
+
+export interface WithdrawalItem {
+  id: number;
+  partnerId: number;
+  amount: number;
+  phone: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  partner: WithdrawalPartner;
+}
+
+export interface WithdrawalListResponse {
+  status: number;
+  message: string;
+  data: {
+    page: number;
+    totalPages: number;
+    totalItems: number;
+    items: WithdrawalItem[];
+  };
+}

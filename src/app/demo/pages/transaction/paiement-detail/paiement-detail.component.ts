@@ -46,6 +46,8 @@ export class PaiementDetailComponent implements OnInit {
       next: (response) => {
         this.transaction = response.data;
         this.isLoading = false;
+
+        console.log('Transaction chargée:', this.transaction);
       },
       error: (error) => {
         console.error('Erreur chargement transaction:', error);
