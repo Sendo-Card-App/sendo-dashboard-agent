@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { KycService, KycDocumentType } from 'src/app/@theme/services/kyc.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthenticationService } from 'src/app/@theme/services/authentication.service';
+import { User } from 'src/app/@theme/types/user';
 
 interface KycDocument {
   id: number;
@@ -61,6 +62,7 @@ export class KycVerificationComponent implements OnInit {
   allDocumentsSubmitted = false;
   hasRejectedDocuments = false;
   userKycDocuments: KycDocument[] = [];
+  user: User['user'] | null = null;
 
   kycSteps: KycStep[] = [
     {
@@ -78,7 +80,7 @@ export class KycVerificationComponent implements OnInit {
     {
       id: 'ADDRESS_PROOF',
       title: 'Justificatif de domicile',
-      description: 'Facture récente (électricité, eau, téléphone) de moins de 3 mois prouvant votre adresse.',
+      description: 'Facture récente (électricité, eau, téléphone, plan de localisation) de moins de 3 mois prouvant votre adresse.',
       icon: 'home',
       completed: false,
       files: [],
@@ -151,11 +153,25 @@ export class KycVerificationComponent implements OnInit {
     this.authService.getUserIdentifiant().subscribe({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       next: (response: any) => {
-        if (response.data?.kycDocuments) {
-          this.userKycDocuments = response.data.kycDocuments;
-          this.updateStepsWithExistingDocuments();
+        if (response.data) {
+          this.user = response.data;
+
+          // Si le merchant est un particulier, on enlève RCCM et ARTICLES_ASSOCIATION_PROOF
+          if (this.user && this.user.merchant?.typeAccount === 'Particulier') {
+            this.kycSteps = this.kycSteps.filter(
+              step => step.id !== 'RCCM' && step.id !== 'ARTICLES_ASSOCIATION_PROOF'
+            );
+          }
+
+          if (response.data.kycDocuments) {
+            this.userKycDocuments = response.data.kycDocuments;
+            this.updateStepsWithExistingDocuments();
+          } else {
+            this.calculateProgress();
+          }
+        } else {
+          this.calculateProgress();
         }
-        this.calculateProgress();
       },
       error: (error) => {
         console.error('Erreur chargement documents KYC:', error);

@@ -57,7 +57,11 @@ export class AcProfileComponent {
   private updateDisplayData(): void {
     if (!this.userData) return;
 
-    this.userRoles = this.userData.roles?.map(r => r.name).join(', ') || '';
+    //this.userRoles = this.userData.roles?.map(r => r.name).join(', ') || '';
+    const roleNames = this.userData.roles?.map((r) => r.name) ?? [];
+
+    this.userRoles = roleNames.includes('MERCHANT') ? 'Marchand' : 'Client';
+
     this.initContactInfos();
     this.initPersonalDetails();
   }

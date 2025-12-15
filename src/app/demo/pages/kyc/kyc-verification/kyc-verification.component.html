@@ -94,7 +94,7 @@
       </div>
 
       <!-- Message de complétion -->
-      @if (allDocumentsSubmitted) {
+      @if (allDocumentsSubmitted && user && !user.isVerifiedKyc) {
         <div class="completion-message">
           <mat-icon class="success-icon">celebration</mat-icon>
           <div class="completion-text">
@@ -103,15 +103,24 @@
           </div>
         </div>
       }
+      @if (user && user.isVerifiedKyc) {
+        <div class="completion-message">
+          <mat-icon class="success-icon">celebration</mat-icon>
+          <div class="completion-text">
+            <h3>Félicitations !</h3>
+            <p>Tous vos documents ont été soumis. Notre équipe les a examinés et les a validés.</p>
+          </div>
+        </div>
+      }
 
       <!-- Section aide -->
       <div class="help-section">
         <h3 class="help-title">Besoin d'aide ?</h3>
         <p class="help-text">Nous sommes là pour vous guider tout au long du processus de vérification.</p>
-        <button mat-flat-button color="primary" class="help-button">
+        <a mat-flat-button color="primary" class="help-button" href="mailto:infosendo@sf-e.ca">
           <mat-icon>support_agent</mat-icon>
           Contacter l'assistance
-        </button>
+        </a>
       </div>
     </div>
 

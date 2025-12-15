@@ -20,7 +20,17 @@ export class User {
     name: string;
     role: Role1[];
     country: string | null;
-    
+    isVerifiedKyc?: boolean;
+    merchant?: {
+      balance: number;
+      code: string;
+      createdAt: string;
+      id: number;
+      status: "ACTIVE" | "PENDING" | "REFUSED";
+      typeAccount: "Entreprise" | "Particulier";
+      updatedAt: string;
+      userId: number
+    }
   };
 }
 
