@@ -139,6 +139,23 @@ export class PaiementComponent implements OnInit {
     });
   }
 
+  maskPhone(phone: string): string {
+    if (!phone) return '';
+
+    const cleaned = phone.toString().trim(); // au cas où on reçoit un number
+    const length = cleaned.length;
+
+    if (length <= 4) {
+      // Si le numéro fait 4 chiffres ou moins, on ne masque rien
+      return cleaned;
+    }
+
+    const visible = cleaned.slice(-4);
+    const maskedPart = '*'.repeat(length - 4);
+
+    return maskedPart + visible;
+  }
+
   // 🔹 Gestion de la pagination
   onPageChange(event: PageEvent): void {
     this.currentPage = event.pageIndex + 1;

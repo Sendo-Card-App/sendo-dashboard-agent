@@ -96,7 +96,7 @@
     <div class="transfer-modal">
       <div class="transfer-card">
         <div class="transfer-header">
-          <h3>Nouveau transfert</h3>
+          <h3>Nouveau dépôt</h3>
           <button class="btn-close" (click)="cancelTransfer()">
             <i class="ti ti-x"></i>
           </button>
@@ -136,10 +136,10 @@
               </div>
               <div class="user-details">
                 <div class="user-name f-w-600">{{ walletInfo.user.firstname }} {{ walletInfo.user.lastname }}</div>
-                <div class="user-email text-muted">{{ walletInfo.user.email }}</div>
-                <div class="wallet-balance mat-caption">
+                <div class="user-email text-muted">{{ maskPhone(walletInfo.user.phone) }}</div>
+                <!-- <div class="wallet-balance mat-caption">
                   Solde: {{ formatCurrency(walletInfo.balance) }}
-                </div>
+                </div> -->
               </div>
             </div>
           </div>
@@ -168,7 +168,7 @@
               class="btn-confirm"
               (click)="initiateTransfer()"
               [disabled]="!walletInfo || !transferData.amount || transferData.amount <= 0">
-              Confirmer le transfert
+              Confirmer le dépôt
             </button>
           </div>
         </div>
@@ -291,7 +291,7 @@
                   {{ formatDate(transaction.createdAt) }}
                 </td>
                 <td class="description">
-                  {{ transaction.transaction?.description || 'Transfert de fonds' }}
+                  {{ transaction.transaction?.description || 'Dépôt d\'argent' }}
                 </td>
                 <td class="description">
                   <ul class="list-inline p-l-0">
@@ -338,12 +338,12 @@
           <i class="ti ti-lock"></i>
         </div>
         <h2 class="pin-modal-title">
-          {{ currentAction === 'transfer' ? 'Confirmer le transfert' : 'Confirmer le retrait' }}
+          {{ currentAction === 'transfer' ? 'Confirmer le dépôt' : 'Confirmer le retrait' }}
         </h2>
         <p class="pin-modal-subtitle">
           Veuillez saisir votre code PIN à 4 chiffres pour confirmer
           <span *ngIf="currentAction === 'transfer'">
-            le transfert de <strong>{{ formatCurrency(transferData.amount!) }}</strong> à
+            le dépôt de <strong>{{ formatCurrency(transferData.amount!) }}</strong> à
             <strong>{{ walletInfo?.user.firstname }} {{ walletInfo?.user.lastname }}</strong>
           </span>
           <span *ngIf="currentAction === 'withdrawal'">
@@ -413,7 +413,7 @@
           [disabled]="!isPinComplete || isProcessingTransfer || isProcessingWithdrawal"
           (click)="confirmWithPin()">
           <span *ngIf="!isProcessingTransfer && !isProcessingWithdrawal">
-            {{ currentAction === 'transfer' ? 'Confirmer le transfert' : 'Confirmer le retrait' }}
+            {{ currentAction === 'transfer' ? 'Confirmer le dépôt' : 'Confirmer le retrait' }}
           </span>
           <span *ngIf="isProcessingTransfer || isProcessingWithdrawal" class="loading">
             <i class="ti ti-loader"></i> Traitement...
