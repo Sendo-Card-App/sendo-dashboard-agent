@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SharedModule } from 'src/app/demo/shared/shared.module';
-import { MeResponse } from 'src/app/@theme/models';
+import { Merchant, MeResponse } from 'src/app/@theme/models';
 import { UserService } from 'src/app/@theme/services/users.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -38,6 +38,7 @@ export class AcProfileComponent {
   personalDetails: PersonalDetail[] = [];
   isEditing = false;
   loading = false;
+  merchant: Merchant | null = null;
 
   constructor(
     private userService: UserService,
@@ -49,16 +50,35 @@ export class AcProfileComponent {
   private loadUserData(): void {
     const stored = localStorage.getItem('user-info');
     if (!stored) { return; }
-
+    
     this.userData = JSON.parse(stored) as MeResponse;
-    this.updateDisplayData();
+    console.log('Loaded user data:', this.userData);
+
+    this.userService.getUserMerchantById(this.userData.merchant.id)
+    .subscribe({
+      next: (response) => {
+        this.merchant = response.data;
+        console.log('Loaded merchant data:', this.merchant);
+        this.updateDisplayData();
+      },
+      error: (error) => {
+        this.snackBar.open(
+          error.error?.message || 'Erreur lors de la récupération du marchand',
+          'Fermer',
+          { duration: 3000 }
+        );
+      },
+      complete: () => {
+        this.loading = false;
+      }
+    })
   }
 
   private updateDisplayData(): void {
-    if (!this.userData) return;
+    if (!this.merchant) return;
 
     //this.userRoles = this.userData.roles?.map(r => r.name).join(', ') || '';
-    const roleNames = this.userData.roles?.map((r) => r.name) ?? [];
+    const roleNames = this.merchant?.user.roles?.map((r) => r.name) ?? [];
 
     this.userRoles = roleNames.includes('MERCHANT') ? 'Marchand' : 'Client';
 
@@ -70,17 +90,17 @@ export class AcProfileComponent {
     this.contactInfos = [
       {
         icon: 'ti ti-mail',
-        text: this.userData?.email ?? 'Non renseigné',
+        text: this.merchant?.user?.email ?? 'Non renseigné',
         editable: false
       },
       {
         icon: 'ti ti-phone',
-        text: this.userData?.phone ?? 'Non renseigné',
+        text: this.merchant?.user?.phone ?? 'Non renseigné',
         editable: false
       },
       {
         icon: 'ti ti-map-pin',
-        text: this.userData?.address ?? 'Non renseigné',
+        text: this.merchant?.user?.address ?? 'Non renseigné',
         editable: true,
         fieldName: 'address'
       }
@@ -91,31 +111,31 @@ export class AcProfileComponent {
     this.personalDetails = [
       {
         group: 'Prénom',
-        text: this.userData?.firstname ?? 'Non renseigné',
+        text: this.merchant?.user?.firstname ?? 'Non renseigné',
         editable: true,
         fieldName: 'firstname',
         group_2: 'Nom',
-        text_2: this.userData?.lastname ?? 'Non renseigné',
+        text_2: this.merchant?.user?.lastname ?? 'Non renseigné',
         editable_2: true,
         fieldName_2: 'lastname'
       },
       {
         group: 'Profession',
-        text: this.userData?.profession ?? 'Non renseigné',
+        text: this.merchant?.user?.profession ?? 'Non renseigné',
         editable: true,
         fieldName: 'profession',
         group_2: 'Ville',
-        text_2: this.userData?.city ?? 'Non renseigné',
+        text_2: this.merchant?.user?.city ?? 'Non renseigné',
         editable_2: true,
         fieldName_2: 'city'
       },
       {
         group: 'Région',
-        text: this.userData?.region ?? 'Non renseigné',
+        text: this.merchant?.user?.region ?? 'Non renseigné',
         editable: true,
         fieldName: 'region',
         group_2: 'District',
-        text_2: this.userData?.district ?? 'Non renseigné',
+        text_2: this.merchant?.user?.district ?? 'Non renseigné',
         editable_2: true,
         fieldName_2: 'district'
       }
@@ -133,13 +153,13 @@ export class AcProfileComponent {
 
     // Préparer seulement les données modifiables à envoyer
     const updateData = {
-      firstname: this.userData.firstname,
-      lastname: this.userData.lastname,
-      address: this.userData.address,
-      profession: this.userData.profession,
-      city: this.userData.city,
-      region: this.userData.region,
-      district: this.userData.district
+      firstname: this.merchant?.user.firstname,
+      lastname: this.merchant?.user.lastname,
+      address: this.merchant?.user.address,
+      profession: this.merchant?.user.profession,
+      city: this.merchant?.user.city,
+      region: this.merchant?.user.region,
+      district: this.merchant?.user.district
     };
 
     this.userService.updateUser(this.userData.id, updateData)

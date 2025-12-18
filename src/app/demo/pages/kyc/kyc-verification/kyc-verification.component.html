@@ -2,7 +2,7 @@
 <div class="kyc-verification-container">
   <div class="kyc-header">
     <h1 class="kyc-title">Vérification du compte</h1>
-    <p class="kyc-subtitle">Type de compte</p>
+    <p class="kyc-subtitle">Type de compte : {{ user?.merchant?.typeAccount }}</p>
   </div>
 
   <!-- Bannière d'alerte pour les documents rejetés -->
@@ -223,7 +223,7 @@
                   <mat-icon>attach_file</mat-icon>
                   Parcourir les fichiers
                 </button>
-                <p class="file-types">Formats acceptés : JPG, PNG, PDF (Max. 10MB par fichier)</p>
+                <p class="file-types">Formats acceptés : JPG, PNG, PDF (Max. 2MB par fichier)</p>
               </div>
             </div>
 

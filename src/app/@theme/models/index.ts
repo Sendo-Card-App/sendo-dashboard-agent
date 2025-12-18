@@ -15,6 +15,18 @@ export interface BaseResponse<T = unknown> {
     name: string;
   }
 
+export interface Merchant {
+  id: number;
+  balance: number;
+  typeAccount: string;
+  userId: number; 
+  code: string;
+  status: 'ACTIVE' | 'PENDING' | 'REFUSED';
+  createdAt: string;
+  updatedAt: string;
+  user: MeResponse;
+}
+
   export interface MeResponse<T = unknown> {
     id: number;
     firstname: string;
