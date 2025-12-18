@@ -60,8 +60,8 @@ export class KycService {
   }
 
   uploadAllKycDocuments(formData: FormData): Observable<KycUploadResponse> {
-  return this.http.post<KycUploadResponse>(`${this.apiUrl}/kyc/onboarding-merchant`, formData,this.getConfigAuthorized(true));
-}
+    return this.http.post<KycUploadResponse>(`${this.apiUrl}/kyc/onboarding-merchant`, formData,this.getConfigAuthorized(true));
+  }
 
 
   /**

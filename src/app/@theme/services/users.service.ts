@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { catchError, Observable, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { MeResponse } from '../models';
+import { Merchant, MeResponse } from '../models';
 
 export interface UserCreateRequest {
   firstname: string;
@@ -19,7 +19,7 @@ export interface UserCreateRequest {
 interface ApiResponse<T = unknown> {
   status: number;
   message: string;
-  data?: T;
+  data: T;
 }
 
 export interface PaginatedUsers {
@@ -95,35 +95,56 @@ export class UserService {
 
 
   getUsers(
-  page: number = 1,
-  limit: number = 10,
-  country: string | null = null,
-  search: string | null = null
-): Observable<UsersResponse> {
-  let params = new HttpParams()
-    .set('page', page.toString())
-    .set('limit', limit.toString());
+    page: number = 1,
+    limit: number = 10,
+    country: string | null = null,
+    search: string | null = null
+  ): Observable<UsersResponse> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
 
-  // Correction : HttpParams est immuable, il faut réassigner
-  if (country) {
-    params = params.set('country', country);
+    // Correction : HttpParams est immuable, il faut réassigner
+    if (country) {
+      params = params.set('country', country);
+    }
+    if (search) {
+      params = params.set('search', search);
+    }
+
+    const config = this.getConfigAuthorized();
+    return this.http.get<UsersResponse>(`${this.apiUrl}`, {
+      params,
+      headers: config.headers
+    });
   }
-  if (search) {
-    params = params.set('search', search);
-  }
-
-  const config = this.getConfigAuthorized();
-  return this.http.get<UsersResponse>(`${this.apiUrl}`, {
-    params,
-    headers: config.headers
-  });
-}
-
 
   getUserById(userId: string | number): Observable<ApiResponse<MeResponse>> {
     const config = this.getConfigAuthorized();
     return this.http.get<ApiResponse<MeResponse>>(
       `${this.apiUrl}/${userId}`,
+      { headers: config.headers }
+    ).pipe(
+      catchError(error => {
+        // Transformation de l'erreur pour une meilleure gestion
+        let errorMessage = 'Une erreur est survenue';
+        if (error.status === 404) {
+          errorMessage = 'Utilisateur non trouvé';
+        } else if (error.error?.message) {
+          errorMessage = error.error.message;
+        }
+        return throwError(() => ({
+          message: errorMessage,
+          status: error.status || 500
+        }));
+      })
+    );
+  }
+
+  getUserMerchantById(merchantId: string | number): Observable<ApiResponse<Merchant>> {
+    const config = this.getConfigAuthorized();
+    return this.http.get<ApiResponse<Merchant>>(
+      `${this.apiUrl}/merchant/${merchantId}`,
       { headers: config.headers }
     ).pipe(
       catchError(error => {

@@ -14,7 +14,7 @@
 
           <!-- Nom complet -->
           <div class="f-16 f-w-600">
-            {{ userData?.firstname }} {{ userData?.lastname }}
+            {{ merchant?.user?.firstname }} {{ merchant?.user?.lastname }}
           </div>
 
           <!-- Rôles -->
@@ -32,7 +32,7 @@
                   <input
                   matInput
                   type="text"
-                  [(ngModel)]="userData![info.fieldName!]"
+                  [(ngModel)]="merchant?.user![info.fieldName!]"
                   class="form-control"
                   [disabled]="!info.editable">
                 </mat-form-field>
@@ -54,13 +54,13 @@
             <div class="flex-grow-1 m-r-15">
               <mat-progress-bar
                 mode="determinate"
-                [value]="userData?.isVerifiedEmail ? 100 : 50"
-                [color]="userData?.isVerifiedEmail ? 'primary' : 'warn'">
+                [value]="merchant?.user?.isVerifiedEmail ? 100 : 50"
+                [color]="merchant?.user?.isVerifiedEmail ? 'primary' : 'warn'">
               </mat-progress-bar>
             </div>
             <div class="flex-shrink-0">
               <div class="text-muted">
-                {{ userData?.isVerifiedEmail ? 'Email vérifié' : 'Email non vérifié' }}
+                {{ merchant?.user?.isVerifiedEmail ? 'Email vérifié' : 'Email non vérifié' }}
               </div>
             </div>
           </div>
@@ -138,16 +138,22 @@
       <ul class="list-group list-group-flush">
         <li class="list-group-item p-x-0">
           <div class="row">
-            <div class="col-md-6">
-              <p class="m-b-5 text-muted">Solde</p>
+            <div class="col-md-4">
+              <p class="m-b-5 text-muted">Solde marchand</p>
               <div class="f-w-500">
-                {{ userData?.wallet?.balance || 0 }} {{ userData?.wallet?.currency || 'XAF' }}
+                {{ this.merchant?.balance || 0 }} {{ this.merchant?.user?.wallet?.currency || 'XAF' }}
               </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <p class="m-b-5 text-muted">Statut KYC</p>
               <div class="f-w-500">
-                {{ userData?.isVerifiedKYC ? 'Vérifié' : 'Non vérifié' }}
+                {{ this.merchant?.user?.isVerifiedKYC ? 'Vérifié' : 'Non vérifié' }}
+              </div>
+            </div>
+            <div class="col-md-4">
+              <p class="m-b-5 text-muted">Statut compte marchand</p>
+              <div class="f-w-500">
+                {{ this.merchant?.status === 'ACTIVE' ? 'Activé' : this.merchant?.status === 'PENDING' ? 'En attente' : 'Refusé' }}
               </div>
             </div>
           </div>

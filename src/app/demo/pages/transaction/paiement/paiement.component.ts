@@ -227,7 +227,7 @@ export class PaiementComponent implements OnInit {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Confirmation du transfert',
+        title: 'Confirmation du dépôt',
         message: `Êtes-vous sûr de vouloir transférer ${this.formatCurrency(this.transferData.amount)} à ${this.walletInfo.user.firstname} ${this.walletInfo.user.lastname} ?`,
         confirmText: 'Confirmer',
         cancelText: 'Annuler'

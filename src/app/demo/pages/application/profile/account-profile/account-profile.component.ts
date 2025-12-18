@@ -46,7 +46,7 @@ export class AccountProfileComponent implements OnInit {
 
 
       {
-        label: 'Pincode',
+        label: 'Code PIN',
         link: '/profile/account/settings',
         icon: 'ti ti-settings',
         index: 2

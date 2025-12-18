@@ -68,7 +68,7 @@ export class KycVerificationComponent implements OnInit {
     {
       id: 'ID_PROOF',
       title: 'Pièce d\'identité',
-      description: 'Téléchargez une copie recto-verso de votre pièce d\'identité nationale ou passeport en cours de validité.',
+      description: 'Téléchargez deux images : une recto et une autre verso de votre pièce d\'identité nationale ou passeport en cours de validité.',
       icon: 'badge',
       completed: false,
       files: [],
