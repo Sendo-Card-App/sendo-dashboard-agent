@@ -69,6 +69,7 @@ export class MerchantService {
     phone: string;
     amountToWithdraw: number;
     idMerchant: number;
+    isFromBalance: boolean;
   }, pinCode: string): Observable<BaseResponse<null>> {
     return this.http.post<BaseResponse<null>>(
       `${this.baseUrl}/merchant/withdrawal-request`,

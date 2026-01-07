@@ -392,7 +392,8 @@ export class PaiementComponent implements OnInit {
         const payload = {
           phone: this.withdrawalData.phone,
           amountToWithdraw: this.withdrawalData.amount!,
-          idMerchant: merchantId
+          idMerchant: merchantId,
+          isFromBalance: this.withdrawalData.walletType === 'MAIN' ? true : false
         };
 
         this.merchantService.withdrawRequest(payload, pinCode).subscribe({
