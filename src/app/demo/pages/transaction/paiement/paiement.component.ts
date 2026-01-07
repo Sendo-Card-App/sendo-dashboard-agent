@@ -51,7 +51,8 @@ export class PaiementComponent implements OnInit {
   showWithdrawalSection = false;
   withdrawalData = {
     phone: '',
-    amount: null as number | null
+    amount: null as number | null,
+    walletType: '' as 'MAIN' | 'COMMISSION' | ''
   };
   withdrawalError = '';
 
@@ -243,7 +244,12 @@ export class PaiementComponent implements OnInit {
 
   // 🔹 Initialisation du retrait
   initiateWithdrawal(): void {
-    if (!this.withdrawalData.phone || !this.withdrawalData.amount || this.withdrawalData.amount <= 0) {
+    if (
+      !this.withdrawalData.phone || 
+      !this.withdrawalData.amount || 
+      this.withdrawalData.amount <= 0 ||
+      this.withdrawalData.walletType == ''
+    ) {
       this.snackBar.open('Veuillez vérifier les informations du retrait', 'Fermer', {
         duration: 3000
       });
@@ -251,12 +257,13 @@ export class PaiementComponent implements OnInit {
     }
 
     this.currentAction = 'withdrawal';
+    console.log('Données retrait:', this.withdrawalData);
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
         title: 'Confirmation du retrait',
-        message: `Êtes-vous sûr de vouloir effectuer un retrait de ${this.formatCurrency(this.withdrawalData.amount)} vers le numéro ${this.withdrawalData.phone} ?`,
+        message: `Êtes-vous sûr de vouloir effectuer un retrait de ${this.formatCurrency(this.withdrawalData.amount)} FCFA de votre ${this.getLabelWallet(this.withdrawalData.walletType)} vers le numéro ${this.withdrawalData.phone} ?`,
         confirmText: 'Confirmer',
         cancelText: 'Annuler'
       }
@@ -447,7 +454,8 @@ export class PaiementComponent implements OnInit {
   resetWithdrawalForm(): void {
     this.withdrawalData = {
       phone: '',
-      amount: null
+      amount: null,
+      walletType: ''
     };
     this.withdrawalError = '';
     this.pinDigits = ['', '', '', ''];
@@ -515,6 +523,24 @@ export class PaiementComponent implements OnInit {
       case 'FAILED': return 'cancel';
       case 'BLOCKED': return 'block';
       default: return 'help';
+    }
+  }
+
+  getLabelWallet(walletType: 'MAIN' | 'COMMISSION' | ''): string {
+    switch (walletType) {
+      case 'MAIN': return 'solde principale';
+      case 'COMMISSION': return 'solde des commissions';
+      default: return 'solde principale';
+    }
+  }
+
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'COMPLETED': return 'Validé';
+      case 'PENDING': return 'En attente';
+      case 'FAILED': return 'Échoué';
+      case 'BLOCKED': return 'Bloqué';
+      default: return status;
     }
   }
 
