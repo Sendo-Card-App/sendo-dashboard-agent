@@ -257,7 +257,6 @@ export class PaiementComponent implements OnInit {
     }
 
     this.currentAction = 'withdrawal';
-    console.log('Données retrait:', this.withdrawalData);
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
@@ -395,6 +394,7 @@ export class PaiementComponent implements OnInit {
           idMerchant: merchantId,
           isFromBalance: this.withdrawalData.walletType === 'MAIN' ? true : false
         };
+        console.log('Données retrait:', payload);
 
         this.merchantService.withdrawRequest(payload, pinCode).subscribe({
           next: () => {
