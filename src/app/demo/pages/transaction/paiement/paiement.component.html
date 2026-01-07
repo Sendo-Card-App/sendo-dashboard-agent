@@ -52,6 +52,36 @@
             <div *ngIf="withdrawalError" class="error-message">{{ withdrawalError }}</div>
           </div>
 
+          <!-- Champ Source de collecte -->
+          <div class="form-group">
+            <label>Sur quel portefeuille voulez-vous retirer des fonds ?</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input
+                  type="radio"
+                  [(ngModel)]="withdrawalData.walletType"
+                  value="MAIN"
+                  name="walletType"
+                  id="mainBalance"
+                >
+                <span class="radio-custom"></span>
+                Solde principale
+              </label>
+              <label class="radio-label">
+                <input
+                  type="radio"
+                  [(ngModel)]="withdrawalData.walletType"
+                  value="COMMISSION"
+                  name="walletType"
+                  id="commissionBalance"
+                >
+                <span class="radio-custom"></span>
+                Solde commission
+              </label>
+            </div>
+            <div *ngIf="withdrawalError" class="error-message">{{ withdrawalError }}</div>
+          </div>
+
           <!-- Champ montant -->
           <div class="form-group">
             <label for="withdrawalAmount">Montant à retirer (XAF)</label>
@@ -181,7 +211,7 @@
     <div class="filter-section">
       <div class="row">
         <!-- Search Field -->
-        <div class="col-md-3">
+        <!-- <div class="col-md-3">
           <div class="search-field">
             <input
               type="text"
@@ -190,7 +220,7 @@
               class="form-input"
             >
           </div>
-        </div>
+        </div> -->
 
         <!-- Status Filter -->
         <div class="col-md-3">
@@ -283,7 +313,7 @@
                     <i class="ti status-icon" [class]="getStatusIcon(transaction.transaction?.status || transaction.status)"
                        [style.color]="getStatusColor(transaction.transaction?.status || transaction.status)"></i>
                     <span class="status-badge" [style.background]="getStatusColor(transaction.transaction?.status || transaction.status)">
-                      {{ transaction.transaction?.status || transaction.status }}
+                      {{ getStatusLabel(transaction.transaction?.status) || getStatusLabel(transaction.status) }}
                     </span>
                   </div>
                 </td>
